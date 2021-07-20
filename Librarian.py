@@ -18,7 +18,7 @@ class Librarian(commands.Cog, name='Librarian'):
         with open("media.json", "r", encoding="utf-8") as f:
             self.media = json.load(f)
 
-    @commands.command(name='meditations', help="meditations.")
+    @commands.command(name='meditations', help="The Meditations by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
     async def meditations(self, ctx, psg_num: str):
         try:
             bk, cha = psg_num.split(":", maxsplit=1)
@@ -43,7 +43,7 @@ class Librarian(commands.Cog, name='Librarian'):
         embed.set_thumbnail(url=aurelius["thumbnail"])        
         await ctx.send(embed=embed)
 
-    @commands.command(name='enchiridion', help="enchiridion.")
+    @commands.command(name='enchiridion', help="Enchiridion by Epictetus (Oldfather's translation). Example: .enchiridion 34")
     async def enchiridion(self, ctx, chapter: str):
         if not (chapter in self.enchiridion):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{chapter}` in The Enchiridion.")
@@ -60,7 +60,7 @@ class Librarian(commands.Cog, name='Librarian'):
         embed.set_thumbnail(url=epictetus["thumbnail"])        
         await ctx.send(embed=embed)
 
-    @commands.command(name='letters', help="letters.")
+    @commands.command(name='letters', help="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
     async def letters(self, ctx, psg_num: str):
         try:
             bk, cha = psg_num.split(":", maxsplit=1)
