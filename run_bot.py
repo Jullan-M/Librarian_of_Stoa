@@ -19,10 +19,14 @@ def is_guild_owner():
 @commands.check_any(commands.is_owner(), is_guild_owner())
 async def add_cog(ctx, cog_name: str):
     bot.load_extension(cog_name)
+    print(f"Loaded cog: {cog_name}")
+    await ctx.send(f"Added cog {cog_name}.")
 
 @bot.command(name='remove_cog')
 @commands.check_any(commands.is_owner(), is_guild_owner())
 async def remove_cog(ctx, cog_name: str):
     bot.remove_cog(cog_name)
+    print(f"Removed cog: {cog_name}")
+    await ctx.send(f"Removed cog {cog_name}.")
 
 bot.run(TOKEN)
