@@ -3,7 +3,7 @@
         "icon": "https://upload.wikimedia.org/wikipedia/commons/4/41/Young_Folks%27_History_of_Rome_illus326.png",
         "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Marcus_Aurelius_Metropolitan_Museum.png",
         "url": "https://en.wikisource.org/wiki/Author:Marcus_Aurelius_Antoninus",
-        "meditations": "https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus/Book_"
+        "meditations": "https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus"
     },
     "epictetus": {
         "icon": "https://upload.wikimedia.org/wikipedia/commons/3/39/Epictetus_from_L._Annaei_Senecae_philosophi_Opera%2C_1605%2C_title_page_detail.png",
@@ -15,6 +15,8 @@
         "icon": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Seneca.jpg",
         "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pseudo-Seneca_Louvre_Ma921.jpg/1024px-Pseudo-Seneca_Louvre_Ma921.jpg",
         "url": "https://en.wikisource.org/wiki/Author:Seneca",
-        "letters": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_"
+        "letters": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius",
+        "happylife": "https://en.wikisource.org/wiki/Of_a_Happy_Life",
+        "shortness": "https://en.wikisource.org/wiki/On_the_shortness_of_life"
     }
 }
