@@ -31,7 +31,7 @@ class Librarian(commands.Cog, name='Librarian'):
         bk, cha = None, None
         try:
             if not psg_num:
-                bk = random.choices( list(self.meditations.keys()), weights=[17,17,16,51,37,59,74,61,41,38,39,34])[0]
+                bk = random.choices( list(self.meditations.keys()), weights=[len(v.keys()) for v in self.meditations.values()])[0]
                 chapters = list(self.meditations[bk].keys())
                 cha = str(random.choice(chapters) )
             else:
@@ -76,7 +76,7 @@ class Librarian(commands.Cog, name='Librarian'):
         embed.set_thumbnail(url=epictetus["thumbnail"])        
         await ctx.send(embed=embed)
 
-    @commands.command(name='letters', help="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
+    @commands.command(name='letters', aliases=["letter"], help="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
     async def letters(self, ctx, psg_num: str):
         try:
             bk, cha = psg_num.split(":", maxsplit=1)
