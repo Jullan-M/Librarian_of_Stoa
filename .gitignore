@@ -1,3 +1,6 @@
 /.env
-/books
+enchiridion.json
+happylife.json
+letters.json
+shortness.json
 /__pycache__
