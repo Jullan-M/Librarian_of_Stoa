@@ -20,7 +20,7 @@ def fetch_meditations():
         text = results[-1].text
         
         chapter = {}
-        txt_split = re.split("\d+\.", text)[1:]
+        txt_split = re.split("\d+[\. ]", text)[1:]
         for ps, t in enumerate(txt_split):
             chapter[ps + 1] = t.replace("\u200b", "").strip()
         book[i] = chapter
