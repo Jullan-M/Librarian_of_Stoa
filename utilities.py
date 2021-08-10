@@ -1,4 +1,4 @@
-mapping = (
+ROMAN_INTS = (
         (1000, "M"),
         (900, "CM"),
         (500, "D"),
@@ -15,11 +15,11 @@ mapping = (
 )
 
 def int2roman(n: int) -> str:
-    global mapping
+    global ROMAN_INTS
     # Converts an integer to a roman numeral as string
     roman = ""
     r = n # Remainer
-    for i, num in mapping:
+    for i, num in ROMAN_INTS:
         mult = r // i
         if mult:
             roman += mult * num

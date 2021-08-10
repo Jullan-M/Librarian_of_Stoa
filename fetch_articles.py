@@ -36,6 +36,7 @@ def fetch_enchiridion():
     references = results[-1].find_all("sup", class_="reference")
     for r in references: r.extract()
     text = results[-1].text
+    text = re.sub("[\u200b\u200c\u200d\u2060]", "", text)
 
     txt_split = re.split("\n\d+\.", text)[1:]
     for ps, t in enumerate(txt_split):
