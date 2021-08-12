@@ -22,7 +22,7 @@ def fetch_meditations():
         chapter = {}
         txt_split = re.split("\d+[\. ]", text)[1:]
         for ps, t in enumerate(txt_split):
-            chapter[ps + 1] = t.replace("\u200b", "").strip()
+            chapter[ps + 1] = re.sub("[\u200b\u200c\u200d\u2060]|\[\d+\]", "", t).strip()
         book[i] = chapter
 
     with open("books/meditations.json", "w") as f:
