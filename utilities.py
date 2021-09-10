@@ -28,16 +28,23 @@ def int2roman(n: int) -> str:
                 break
     return roman
 
-def split_within(text: str, max_len: int, delim: str):
-    # Splits a long text into two strings such that both string are within max_len length.
-    splitted = text.split(delim)
-
-    test_txt = ""
-    for i in range(1, len(splitted)):
-        if len(delim.join(splitted[:i])) > max_len:
-            i -= 1
-            break
+def split_within(text: str, max_len: int, delim: str, keep_delim: bool = False) -> list:
+    # Splits a long text into parts such that all string are within max_len length.
+    if len(text) <= max_len:
+        return [text]
     
-    part1 = delim.join(splitted[:i])
-    part2 = delim.join(splitted[i:])
-    return (part1, part2)
+    splitted = text.split(delim)
+    split_lens = [len(s) for s in splitted]
+
+    parts = []
+    i = 0
+    for j in range(1, len(split_lens)+1):
+        if sum(split_lens[i:j]) + (j-i)*len(delim) > max_len:
+            part = delim.join(splitted[i:j-1])
+            if keep_delim:
+                part = part + delim
+            parts.append(part)
+            i = j-1
+    parts.append(delim.join(splitted[i:]))
+    
+    return parts
