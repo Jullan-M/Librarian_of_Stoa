@@ -216,3 +216,4 @@ class Librarian(commands.Cog, name='Librarian'):
 
 def setup(bot):
     bot.add_cog(Librarian(bot))
+    print("Librarian cog up and ready!")
