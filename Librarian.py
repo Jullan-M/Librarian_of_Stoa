@@ -48,6 +48,7 @@ class Librarian(commands.Cog, name='Librarian'):
             nonlocal message
             return user == ctx.author and reaction.message.id==message.id and str(reaction.emoji) in ["◀️", "▶️"]
             # This makes sure nobody except the command sender can interact with the "menu"
+            # The user can't flip pages in multiple messages at once
 
         while True:
             try:
@@ -98,12 +99,15 @@ class Librarian(commands.Cog, name='Librarian'):
         passage_url = f"{aurelius['meditations']}/Book_{bk}"
         color = 0xFF0000 # Red
 
-        if len(passage) > MAX_EMBED_LENGTH:
-            passage = passage[:4090] + " [...]"
+        to_send = split_within(passage, MAX_EMBED_LENGTH, "\n", keep_delim=True)
         
-        embed = self.generate_embed(title, passage, aurelius, passage_url, color)
+        embed = self.generate_embed(title, to_send[0], aurelius, passage_url, color)
         embed.set_thumbnail(url=aurelius["thumbnail"])        
         await ctx.send(embed=embed)
+        if len(to_send) > 1:
+            # Mediations doesn't have any passages over 2 embeds long
+            embed = discord.Embed(description=to_send[1], color=color)
+            await ctx.send(embed=embed)
 
     @commands.command(name='enchiridion', help="Enchiridion by Epictetus (Oldfather's translation). Example: .enchiridion 34")
     async def enchiridion(self, ctx, chapter: str = ""):
@@ -118,12 +122,15 @@ class Librarian(commands.Cog, name='Librarian'):
         passage_url = epictetus["enchiridion"]
         color = 0x00FF00 # Green
 
-        if len(passage) > MAX_EMBED_LENGTH:
-            passage = passage[:4090] + " [...]"
+        to_send = split_within(passage, MAX_EMBED_LENGTH, "\n", keep_delim=True)
         
-        embed = self.generate_embed(title, passage, epictetus, passage_url, color)
+        embed = self.generate_embed(title, to_send[0], epictetus, passage_url, color)
         embed.set_thumbnail(url=epictetus["thumbnail"])        
         await ctx.send(embed=embed)
+        if len(to_send) > 1:
+            # Enchiridion doesn't have any passages over 2 embeds long
+            embed = discord.Embed(description=to_send[1], color=color)
+            await ctx.send(embed=embed)
 
     @commands.command(name='letters', aliases=["letter"], help="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
     async def letters(self, ctx, psg_num: str):
