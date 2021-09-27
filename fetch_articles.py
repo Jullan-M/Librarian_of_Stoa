@@ -59,7 +59,7 @@ def fetch_letters():
         chapter = {}
         txt_split = re.split("\d+\.\s", text)
         for ps, t in enumerate(txt_split):
-            passage = re.sub("[\d+]", "", t.lstrip()).replace("[]", "")
+            passage = re.sub("\[\d+\]", "", t.lstrip())
             if passage:
                 chapter[ps] = passage
         book[i] = chapter

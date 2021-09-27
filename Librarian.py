@@ -39,23 +39,23 @@ class Librarian(commands.Cog, name='Librarian'):
             em.set_footer(text=f"Page {pg} of {pages}")
 
         message = await ctx.send(embed=embeds[0])
-        # getting the message object for editing and reacting
 
         await message.add_reaction("◀️")
         await message.add_reaction("▶️")
 
         def check(reaction, user):
+            # Make sure nobody except the command sender can interact with the "menu"
+            # The user can't flip pages in multiple messages at once either
             nonlocal message
             return user == ctx.author and reaction.message.id==message.id and str(reaction.emoji) in ["◀️", "▶️"]
-            # This makes sure nobody except the command sender can interact with the "menu"
-            # The user can't flip pages in multiple messages at once
+            
 
         while True:
             try:
+                # wait for a reaction to be added
+                # times out after MULTIPAGE_TIMEOUT seconds
                 reaction, user = await self.bot.wait_for("reaction_add", timeout=MULTIPAGE_TIMEOUT, check=check)
-                # waiting for a reaction to be added - times out after x seconds, 60 in this
-                # example
-
+                
                 if str(reaction.emoji) == "▶️" and cur_page != pages-1:
                     cur_page += 1
                     await message.edit(embed=embeds[cur_page])
@@ -66,13 +66,13 @@ class Librarian(commands.Cog, name='Librarian'):
                     await message.edit(embed=embeds[cur_page])
                     await message.remove_reaction(reaction, user)
                 else:
-                    await message.remove_reaction(reaction, user)
-                    # removes reactions if the user tries to go forward on the last page or
+                    # remove reactions if the user tries to go forward on the last page or
                     # backwards on the first page
+                    await message.remove_reaction(reaction, user)
             except asyncio.TimeoutError:
+                # end the loop if user doesn't react after MULTIPAGE_TIMEOUT seconds
                 await message.clear_reactions()
                 break
-                # ending the loop if user doesn't react after x seconds
 
     @commands.command(name='meditations', help="The Meditations by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
     async def meditations(self, ctx, psg_num: str = ""):
@@ -156,7 +156,7 @@ class Librarian(commands.Cog, name='Librarian'):
                     return await ctx.send(f"{ctx.author.mention}, there is no paragraph `{cha}` in letter `{bk}` of the Moral letters.")
                 passage = self.letters[bk][cha].rstrip()
         else:
-            passage = "\n".join(self.letters[bk].values())
+            passage = "".join(self.letters[bk].values()).replace("\n", "\n\n")
         title = f"Moral letters to Lucilius: Letter {bk}"
         if cha:
             title += f", §{cha}"
