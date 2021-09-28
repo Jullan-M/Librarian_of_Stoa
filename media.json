@@ -11,7 +11,8 @@
         "icon": "https://upload.wikimedia.org/wikipedia/commons/3/39/Epictetus_from_L._Annaei_Senecae_philosophi_Opera%2C_1605%2C_title_page_detail.png",
         "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Epicteti_Enchiridion_Latinis_versibus_adumbratum_%28Oxford_1715%29_frontispiece.jpg/678px-Epicteti_Enchiridion_Latinis_versibus_adumbratum_%28Oxford_1715%29_frontispiece.jpg",
         "url": "https://en.wikisource.org/wiki/Author:Epictetus",
-        "enchiridion": "https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual"
+        "enchiridion": "https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual",
+        "discourses": "https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments"
     },
     "seneca": {
         "name": "Seneca the Younger",

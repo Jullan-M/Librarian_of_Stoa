@@ -113,8 +113,35 @@ def fetch_shortness():
     with open("books/shortness.json", "w", encoding="utf-8") as f:
         f.write(json.dumps(book, indent="\t", ensure_ascii=False))
 
+def fetch_discourses():
+    books = {}
+    chapters = [30, 26, 26, 13]
+
+    for i, chaps in enumerate(chapters):
+        books[i+1] = {}
+        for j in range(chaps):
+            print(f"Fetching \"Discourses\" Book {i+1} Chapter {j+1} of {chaps}", end="\r")
+            url = f"https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Book_{i+1}/Chapter_{j+1}"
+            results = scrape_by_class(url, "prp-pages-output")
+            
+            # Remove superfluous stuff
+            references = results[-1].find_all("sup", class_="reference")
+            for r in references: r.extract()
+            for s in results[-1].select("sup"): s.extract() # Remove green superscripted numbers
+            text = results[-1].text
+            text = re.sub("[\u200b\u200c\u200d\u2060]", "", text)
+            text = re.sub(f"CHAPTER {int2roman(j+1)}", "", text)
+            text = re.sub(f"\n\n\n", "\n\n", text)
+
+            #txt_split = re.split("\n\d+\.", text)[1:]
+            books[i+1][j+1] = text.strip()
+
+    with open("books/discourses.json", "w", encoding="utf-8") as f:
+        f.write(json.dumps(books, indent="\t", ensure_ascii=False))
+
 fetch_meditations()
 fetch_enchiridion()
 fetch_letters()
 fetch_happylife()
 fetch_shortness()
+fetch_discourses()

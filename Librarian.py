@@ -22,6 +22,7 @@ class Librarian(commands.Cog, name='Librarian'):
         self.letters = load_json("books/letters.json")
         self.happylife = load_json("books/happylife.json")
         self.shortness = load_json("books/shortness.json")
+        self.discourses= load_json("books/discourses.json")
         self.media = load_json("media.json")
 
     @staticmethod
@@ -213,6 +214,41 @@ class Librarian(commands.Cog, name='Librarian'):
             # On the shortness of life doesn't have any passages over 2 embeds long
             embed = discord.Embed(description=to_send[1], color=color)
             await ctx.send(embed=embed)
+
+    @commands.command(name='discourses', help="The Discourses by Epictetus (Oldfather's translation). Example: .discourses 1:21")
+    async def discourses(self, ctx, psg_num: str = ""):
+        bk, cha = None, None
+        try:
+            if not psg_num:
+                bk = random.choices( list(self.discourses.keys()), weights=[len(v.keys()) for v in self.discourses.values()])[0]
+                chapters = list(self.discourses[bk].keys())
+                cha = str(random.choice(chapters) )
+            else:
+                bk, cha = psg_num.split(":", maxsplit=1)
+        except ValueError:
+            return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
+            
+        if not (bk in self.discourses):
+            return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` in The Discourses (or it may have been lost to time 😢).")
+            
+        if not (cha in self.discourses[bk]):
+            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of The Discourses.")
+        
+        title = f"The Discourses Book {int2roman(int(bk))}, Chapter {cha}"
+        passage = self.discourses[bk][cha]
+        epictetus = self.media["epictetus"] # author data
+        passage_url = f"{epictetus['discourses']}/Book_{bk}/Chapter_{cha}"
+        color = 0x00FF00 # Green
+
+        if len(passage) > MAX_EMBED_LENGTH:
+            to_send = split_within(passage, MAX_EMBED_LENGTH, "\n", keep_delim=True)
+            embeds = [self.generate_embed(title, t, epictetus, passage_url, color) for t in to_send]
+            await self.multi_page(ctx, embeds)
+            return
+        
+        embed = self.generate_embed(title, passage, epictetus, passage_url, color)
+        embed.set_thumbnail(url=epictetus["thumbnail"])        
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Librarian(bot))
