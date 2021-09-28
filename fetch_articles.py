@@ -120,7 +120,7 @@ def fetch_discourses():
     for i, chaps in enumerate(chapters):
         books[i+1] = {}
         for j in range(chaps):
-            print(f"Fetching \"Discourses\" Book {i+1} Chapter {j+1} of {chaps}", end="\r")
+            print(f"Fetching \"Discourses\" Book {i+1} Chapter {j+1}\tof {chaps}", end="\r")
             url = f"https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Book_{i+1}/Chapter_{j+1}"
             results = scrape_by_class(url, "prp-pages-output")
             
@@ -130,7 +130,7 @@ def fetch_discourses():
             for s in results[-1].select("sup"): s.extract() # Remove green superscripted numbers
             text = results[-1].text
             text = re.sub("[\u200b\u200c\u200d\u2060]", "", text)
-            text = re.sub(f"CHAPTER {int2roman(j+1)}", "", text)
+            text = re.sub(f"CHAPTER {int2roman(j+1)}\D", "", text)
             text = re.sub(f"\n\n\n", "\n\n", text)
 
             #txt_split = re.split("\n\d+\.", text)[1:]

@@ -2,6 +2,7 @@ import asyncio
 import discord
 import json
 import random
+import re
 from discord.ext import commands
 from utilities import int2roman, split_within
 
@@ -84,7 +85,7 @@ class Librarian(commands.Cog, name='Librarian'):
                 chapters = list(self.meditations[bk].keys())
                 cha = str(random.choice(chapters) )
             else:
-                bk, cha = psg_num.split(":", maxsplit=1)
+                bk, cha = re.split("[:\.]", psg_num, maxsplit=1)
         except ValueError:
             return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `5:23` for Book 5, Chapter 23.")
             
@@ -136,8 +137,8 @@ class Librarian(commands.Cog, name='Librarian'):
     @commands.command(name='letters', aliases=["letter"], help="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
     async def letters(self, ctx, psg_num: str):
         bk, cha = None, None
-        if ":" in psg_num:
-            bk, cha = psg_num.split(":", maxsplit=1)
+        if any([s in psg_num for s in [":", "."]]) in psg_num:
+            bk, cha = re.split("[:\.]", psg_num, maxsplit=1)
         else:
             bk = psg_num
 
@@ -224,7 +225,7 @@ class Librarian(commands.Cog, name='Librarian'):
                 chapters = list(self.discourses[bk].keys())
                 cha = str(random.choice(chapters) )
             else:
-                bk, cha = psg_num.split(":", maxsplit=1)
+                bk, cha = re.split("[:\.]", psg_num, maxsplit=1)
         except ValueError:
             return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
             
@@ -234,8 +235,9 @@ class Librarian(commands.Cog, name='Librarian'):
         if not (cha in self.discourses[bk]):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of The Discourses.")
         
-        title = f"The Discourses Book {int2roman(int(bk))}, Chapter {cha}"
-        passage = self.discourses[bk][cha]
+        title, passage = self.discourses[bk][cha].split("\n", maxsplit=1)
+        title = f"The Discourses – Book {int2roman(int(bk))}, Chapter {cha}\n{title}"
+        passage = passage.lstrip()
         epictetus = self.media["epictetus"] # author data
         passage_url = f"{epictetus['discourses']}/Book_{bk}/Chapter_{cha}"
         color = 0x00FF00 # Green
