@@ -53,15 +53,22 @@ def fetch_letters():
         url = f"https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_{i}"
         results = scrape_by_class(url, "mw-parser-output")
         text = results[-1].text
-        text = text.split("[edit]", maxsplit=1)[-1]
+        title, text = text.split("[edit]", maxsplit=1)
+        title = title.rsplit("\n", maxsplit=1)[-1]
         text = text.split("Footnotes", maxsplit=1)[0]
 
         chapter = {}
+        # Chapter 0 is the title of the letter
+        chapter[0] = title.split(". ", maxsplit=1)[-1].replace("[1]", "")
+
         txt_split = re.split("\d+\.\s", text)
         for ps, t in enumerate(txt_split):
             passage = re.sub("\[\d+\]", "", t.lstrip())
+            # Replace single linebreaks with double using regex negative lookbehind and lookahead
+            passage = re.sub("(?<!\n)\n(?!\n)", "\n\n", passage)
             if passage:
                 chapter[ps] = passage
+        
         book[i] = chapter
 
     with open("books/letters.json", "w", encoding="utf-8") as f:

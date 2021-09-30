@@ -4,14 +4,15 @@ import json
 import random
 import re
 from discord.ext import commands
-from utilities import int2roman, split_within
+from utilities import int2roman, split_within, uniform_random_choice_from_dict
 
 MAX_EMBED_LENGTH = 4096
-MULTIPAGE_TIMEOUT = 600
+MULTIPAGE_TIMEOUT = 900 # Timeout period for page flipping with reacts
 
 class Librarian(commands.Cog, name='Librarian'):
     def __init__(self, bot):
         self.bot = bot
+        self.multipage_timeout = MULTIPAGE_TIMEOUT
 
         def load_json(filename: str):
             with open(filename, "r", encoding="utf-8") as f:
@@ -56,7 +57,7 @@ class Librarian(commands.Cog, name='Librarian'):
             try:
                 # wait for a reaction to be added
                 # times out after MULTIPAGE_TIMEOUT seconds
-                reaction, user = await self.bot.wait_for("reaction_add", timeout=MULTIPAGE_TIMEOUT, check=check)
+                reaction, user = await self.bot.wait_for("reaction_add", timeout=self.multipage_timeout, check=check)
                 
                 if str(reaction.emoji) == "▶️" and cur_page != pages-1:
                     cur_page += 1
@@ -81,9 +82,7 @@ class Librarian(commands.Cog, name='Librarian'):
         bk, cha = None, None
         try:
             if not psg_num:
-                bk = random.choices( list(self.meditations.keys()), weights=[len(v.keys()) for v in self.meditations.values()])[0]
-                chapters = list(self.meditations[bk].keys())
-                cha = str(random.choice(chapters) )
+                bk, cha = uniform_random_choice_from_dict(self.meditations)
             else:
                 bk, cha = re.split("[:\.]", psg_num, maxsplit=1)
         except ValueError:
@@ -135,33 +134,40 @@ class Librarian(commands.Cog, name='Librarian'):
             await ctx.send(embed=embed)
 
     @commands.command(name='letters', aliases=["letter"], help="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
-    async def letters(self, ctx, psg_num: str):
+    async def letters(self, ctx, psg_num: str = ""):
         bk, cha = None, None
-        if any([s in psg_num for s in [":", "."]]) in psg_num:
+        if any([s in psg_num for s in [":", "."]]):
             bk, cha = re.split("[:\.]", psg_num, maxsplit=1)
         else:
             bk = psg_num
-
-        if not (bk in self.letters):
+        
+        if not bk:
+            bk = str(random.randrange(1,125)) # Choose a random letter of the 124 letters
+        elif not (bk in self.letters):
             return await ctx.send(f"{ctx.author.mention}, there is no letter `{bk}` of the Moral letters.")
-            
+        
         passage = None
         seneca = self.media["seneca"]
         if cha:
             if "-" in cha:
                 cha1, cha2 = cha.split("-", maxsplit=1)
-                if int(cha2) <= int(cha1) or not (cha1 in self.letters[bk] and cha2 in self.letters[bk]):
+                if not 0 < int(cha1) < int(cha2) or not (cha1 in self.letters[bk] and cha2 in self.letters[bk]):
                     return await ctx.send(f"{ctx.author.mention}, `{cha1}-{cha2}` is not a valid range.")
                 passage = " ".join([self.letters[bk][str(ch)] for ch in range(int(cha1), int(cha2) + 1)]).rstrip()
             else:
-                if not (cha in self.letters[bk]):
+                if not (int(cha) > 0 and cha in self.letters[bk]):
                     return await ctx.send(f"{ctx.author.mention}, there is no paragraph `{cha}` in letter `{bk}` of the Moral letters.")
                 passage = self.letters[bk][cha].rstrip()
         else:
-            passage = "".join(self.letters[bk].values()).replace("\n", "\n\n")
+            letter_passages = list(self.letters[bk].values())[1:]
+            passage = "".join(letter_passages)
         title = f"Moral letters to Lucilius: Letter {bk}"
+        
         if cha:
             title += f", §{cha}"
+        else:
+            title += f"\n{self.letters[bk]['0']}"
+
         passage_url = f"{seneca['letters']}/Letter_{bk}"
         color = 0x0000FF # Red
         if len(passage) > MAX_EMBED_LENGTH and not cha:
@@ -221,9 +227,7 @@ class Librarian(commands.Cog, name='Librarian'):
         bk, cha = None, None
         try:
             if not psg_num:
-                bk = random.choices( list(self.discourses.keys()), weights=[len(v.keys()) for v in self.discourses.values()])[0]
-                chapters = list(self.discourses[bk].keys())
-                cha = str(random.choice(chapters) )
+                bk, cha = uniform_random_choice_from_dict(self.discourses)
             else:
                 bk, cha = re.split("[:\.]", psg_num, maxsplit=1)
         except ValueError:
