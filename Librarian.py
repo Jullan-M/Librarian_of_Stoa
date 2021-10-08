@@ -42,7 +42,7 @@ class Librarian(commands.Cog, name='Librarian'):
             em.set_footer(text=f"Page {pg} of {pages}")
 
         message = await ctx.send(embed=embeds[0])
-
+        
         await message.add_reaction("◀️")
         await message.add_reaction("▶️")
 
@@ -50,7 +50,8 @@ class Librarian(commands.Cog, name='Librarian'):
             # Make sure nobody except the command sender can interact with the "menu"
             # The user can't flip pages in multiple messages at once either
             nonlocal message
-            return user == ctx.author and reaction.message.id==message.id and str(reaction.emoji) in ["◀️", "▶️"]
+            valid_emoji = ["◀️", "▶️", "🗑️"]
+            return user == ctx.author and reaction.message.id==message.id and str(reaction.emoji) in valid_emoji
             
 
         while True:
@@ -68,6 +69,10 @@ class Librarian(commands.Cog, name='Librarian'):
                     cur_page -= 1
                     await message.edit(embed=embeds[cur_page])
                     await message.remove_reaction(reaction, user)
+                elif str(reaction.emoji) == "🗑️":
+                    # Bot messages can be deleted by reacting with the waste basket emoji
+                    await message.delete()
+                    break
                 else:
                     # remove reactions if the user tries to go forward on the last page or
                     # backwards on the first page
@@ -75,6 +80,40 @@ class Librarian(commands.Cog, name='Librarian'):
             except asyncio.TimeoutError:
                 # end the loop if user doesn't react after MULTIPAGE_TIMEOUT seconds
                 await message.clear_reactions()
+                break
+
+    async def deletables(self, ctx, messages):
+        # Makes messages deletable by reacting wastebasket on them
+        # Check mark reacts make reactions go away (but one may still delete them!)
+        last_message = messages[-1]
+        def check(reaction, user):
+            # Make sure nobody except the command sender can interact with the "menu"
+            # The user can't flip pages in multiple messages at once either
+            nonlocal last_message
+            return user == ctx.author and reaction.message.id==last_message.id and str(reaction.emoji) in ["✅", "🗑️"]
+        
+        await last_message.add_reaction("✅")
+        await last_message.add_reaction("🗑️")
+
+        while True:
+            try:
+                # wait for a reaction to be added
+                # times out after MULTIPAGE_TIMEOUT seconds
+                reaction, user = await self.bot.wait_for("reaction_add", timeout=60, check=check)
+                
+                if str(reaction.emoji) == "✅":
+                    await last_message.remove_reaction(reaction, user)
+                    await last_message.clear_reactions()
+                elif str(reaction.emoji) == "🗑️":
+                    for m in messages: await m.delete()
+                    break
+                else:
+                    # remove reactions if the user tries to go forward on the last page or
+                    # backwards on the first page
+                    await last_message.remove_reaction(reaction, user)
+            except asyncio.TimeoutError:
+                # end the loop if user doesn't react after MULTIPAGE_TIMEOUT seconds
+                await last_message.clear_reactions()
                 break
 
     @commands.command(name='meditations', help="The Meditations by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
@@ -104,11 +143,13 @@ class Librarian(commands.Cog, name='Librarian'):
         
         embed = self.generate_embed(title, to_send[0], aurelius, passage_url, color)
         embed.set_thumbnail(url=aurelius["thumbnail"])        
-        await ctx.send(embed=embed)
+        messages = []     
+        messages.append(await ctx.send(embed=embed))
         if len(to_send) > 1:
             # Mediations doesn't have any passages over 2 embeds long
             embed = discord.Embed(description=to_send[1], color=color)
-            await ctx.send(embed=embed)
+            messages.append(await ctx.send(embed=embed))
+        await self.deletables(ctx, messages)
 
     @commands.command(name='enchiridion', help="Enchiridion by Epictetus (Oldfather's translation). Example: .enchiridion 34")
     async def enchiridion(self, ctx, chapter: str = ""):
@@ -126,12 +167,14 @@ class Librarian(commands.Cog, name='Librarian'):
         to_send = split_within(passage, MAX_EMBED_LENGTH, "\n", keep_delim=True)
         
         embed = self.generate_embed(title, to_send[0], epictetus, passage_url, color)
-        embed.set_thumbnail(url=epictetus["thumbnail"])        
-        await ctx.send(embed=embed)
+        embed.set_thumbnail(url=epictetus["thumbnail"])   
+        messages = []     
+        messages.append(await ctx.send(embed=embed))
         if len(to_send) > 1:
             # Enchiridion doesn't have any passages over 2 embeds long
             embed = discord.Embed(description=to_send[1], color=color)
-            await ctx.send(embed=embed)
+            messages.append(await ctx.send(embed=embed))
+        await self.deletables(ctx, messages)
 
     @commands.command(name='letters', aliases=["letter"], help="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
     async def letters(self, ctx, psg_num: str = ""):
@@ -177,8 +220,9 @@ class Librarian(commands.Cog, name='Librarian'):
             return
         
         embed = self.generate_embed(title, passage, seneca, passage_url, color)
-        embed.set_thumbnail(url=seneca["thumbnail"])        
-        await ctx.send(embed=embed)
+        embed.set_thumbnail(url=seneca["thumbnail"])
+        messages = [await ctx.send(embed=embed)]     
+        await self.deletables(ctx, messages)
 
     @commands.command(name='happylife', help="Of a Happy Life by Seneca (Stewart's translation). Example: .happylife 12")
     async def happylife(self, ctx, chapter: str):
@@ -195,11 +239,13 @@ class Librarian(commands.Cog, name='Librarian'):
         to_send = split_within(passage, MAX_EMBED_LENGTH, ". ", keep_delim=True)
 
         embed = self.generate_embed(title, to_send[0], seneca, passage_url, color)
-        await ctx.send(embed=embed)
+        messages = []     
+        messages.append(await ctx.send(embed=embed))
         if len(to_send) > 1:
             # Of a Happy Life doesn't have any passages over 2 embeds long
             embed = discord.Embed(description=to_send[1], color=color)
-            await ctx.send(embed=embed)
+            messages.append(await ctx.send(embed=embed))
+        await self.deletables(ctx, messages)
 
     @commands.command(name='shortness', help="On the shortness of life by Seneca (Basore's translation). Example: .shortness 13")
     async def shortness(self, ctx, chapter: str):
@@ -216,11 +262,13 @@ class Librarian(commands.Cog, name='Librarian'):
         to_send = split_within(passage, MAX_EMBED_LENGTH, ". ", keep_delim=True)
 
         embed = self.generate_embed(title, to_send[0], seneca, passage_url, color)
-        await ctx.send(embed=embed)
+        messages = []     
+        messages.append(await ctx.send(embed=embed))
         if len(to_send) > 1:
             # On the shortness of life doesn't have any passages over 2 embeds long
             embed = discord.Embed(description=to_send[1], color=color)
-            await ctx.send(embed=embed)
+            messages.append(await ctx.send(embed=embed))
+        await self.deletables(ctx, messages)
 
     @commands.command(name='discourses', help="The Discourses by Epictetus (Oldfather's translation). Example: .discourses 1:21")
     async def discourses(self, ctx, psg_num: str = ""):
