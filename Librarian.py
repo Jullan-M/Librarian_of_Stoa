@@ -46,11 +46,11 @@ class Librarian(commands.Cog, name='Librarian'):
         await message.add_reaction("◀️")
         await message.add_reaction("▶️")
 
+        valid_emoji = ["◀️", "▶️", "🗑️"]
         def check(reaction, user):
             # Make sure nobody except the command sender can interact with the "menu"
             # The user can't flip pages in multiple messages at once either
             nonlocal message
-            valid_emoji = ["◀️", "▶️", "🗑️"]
             return user == ctx.author and reaction.message.id==message.id and str(reaction.emoji) in valid_emoji
             
 
@@ -77,8 +77,9 @@ class Librarian(commands.Cog, name='Librarian'):
                     # remove reactions if the user tries to go forward on the last page or
                     # backwards on the first page
                     await message.remove_reaction(reaction, user)
-            except asyncio.TimeoutError:
+            except (asyncio.TimeoutError, discord.errors.Forbidden):
                 # end the loop if user doesn't react after MULTIPAGE_TIMEOUT seconds
+                for r in valid_emoji: await message.remove_reaction(r, self.bot.user)
                 await message.clear_reactions()
                 break
 
@@ -86,14 +87,16 @@ class Librarian(commands.Cog, name='Librarian'):
         # Makes messages deletable by reacting wastebasket on them
         # Check mark reacts make reactions go away (but one may still delete them!)
         last_message = messages[-1]
+
+        await last_message.add_reaction("✅")
+        await last_message.add_reaction("🗑️")
+
+        valid_emoji = ["✅", "🗑️"]
         def check(reaction, user):
             # Make sure nobody except the command sender can interact with the "menu"
             # The user can't flip pages in multiple messages at once either
             nonlocal last_message
-            return user == ctx.author and reaction.message.id==last_message.id and str(reaction.emoji) in ["✅", "🗑️"]
-        
-        await last_message.add_reaction("✅")
-        await last_message.add_reaction("🗑️")
+            return user == ctx.author and reaction.message.id==last_message.id and str(reaction.emoji) in valid_emoji
 
         while True:
             try:
@@ -102,7 +105,6 @@ class Librarian(commands.Cog, name='Librarian'):
                 reaction, user = await self.bot.wait_for("reaction_add", timeout=60, check=check)
                 
                 if str(reaction.emoji) == "✅":
-                    await last_message.remove_reaction(reaction, user)
                     await last_message.clear_reactions()
                 elif str(reaction.emoji) == "🗑️":
                     for m in messages: await m.delete()
@@ -111,8 +113,9 @@ class Librarian(commands.Cog, name='Librarian'):
                     # remove reactions if the user tries to go forward on the last page or
                     # backwards on the first page
                     await last_message.remove_reaction(reaction, user)
-            except asyncio.TimeoutError:
+            except (asyncio.TimeoutError, discord.errors.Forbidden):
                 # end the loop if user doesn't react after MULTIPAGE_TIMEOUT seconds
+                for r in valid_emoji: await last_message.remove_reaction(r, self.bot.user)
                 await last_message.clear_reactions()
                 break
 

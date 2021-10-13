@@ -53,7 +53,7 @@ def split_within(text: str, max_len: int, delim: str, keep_delim: bool = False) 
 
 def uniform_random_choice_from_dict(books: dict):
     # Chooses uniformly a random value from a two-layered dict with the structure (say)
-    # books = {k1: {k11: v1, k12: v2}, k2: {k21: v3}}
+    # books = {bk1: {cha11: v1, cha12: v2}, bk2: {cha21: v3}}
     # Returns the key-pair for that value
     bk = random.choices( list(books.keys()), weights=[len(v.keys()) for v in books.values()] )[0]
     chapters = list(books[bk].keys())
