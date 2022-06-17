@@ -1,4 +1,5 @@
 import asyncio
+from tkinter import E
 import discord
 import json
 import random
@@ -83,9 +84,12 @@ class Librarian(commands.Cog, name='Librarian'):
                 await message.clear_reactions()
                 break
 
-    async def deletables(self, ctx, messages):
+    async def deletables(self, ctx, embeds):
         # Makes messages deletable by reacting wastebasket on them
         # Check mark reacts make reactions go away (but one may still delete them!)
+        messages = []
+        for e in embeds:
+            messages.append(await ctx.send(embed=e)) 
         last_message = messages[-1]
 
         await last_message.add_reaction("✅")
@@ -146,13 +150,13 @@ class Librarian(commands.Cog, name='Librarian'):
         
         embed = self.generate_embed(title, to_send[0], aurelius, passage_url, color)
         embed.set_thumbnail(url=aurelius["thumbnail"])        
-        messages = []     
-        messages.append(await ctx.send(embed=embed))
+        
+        embeds = []     
+        embeds.append(embed)
         if len(to_send) > 1:
             # Mediations doesn't have any passages over 2 embeds long
-            embed = discord.Embed(description=to_send[1], color=color)
-            messages.append(await ctx.send(embed=embed))
-        await self.deletables(ctx, messages)
+            embeds.append(discord.Embed(description=to_send[1], color=color))
+        await self.deletables(ctx, embeds)
 
     @commands.command(name='enchiridion', help="Enchiridion by Epictetus (Oldfather's translation). Example: .enchiridion 34")
     async def enchiridion(self, ctx, chapter: str = ""):
@@ -170,17 +174,17 @@ class Librarian(commands.Cog, name='Librarian'):
         to_send = split_within(passage, MAX_EMBED_LENGTH, "\n", keep_delim=True)
         
         embed = self.generate_embed(title, to_send[0], epictetus, passage_url, color)
-        embed.set_thumbnail(url=epictetus["thumbnail"])   
-        messages = []     
-        messages.append(await ctx.send(embed=embed))
+        embed.set_thumbnail(url=epictetus["thumbnail"])
+        
+        embeds = []     
+        embeds.append(embed)
         if len(to_send) > 1:
             # Enchiridion doesn't have any passages over 2 embeds long
-            embed = discord.Embed(description=to_send[1], color=color)
-            messages.append(await ctx.send(embed=embed))
-        await self.deletables(ctx, messages)
+            embeds.append(discord.Embed(description=to_send[1], color=color))
+        await self.deletables(ctx, embeds)
 
     @commands.command(name='letters', aliases=["letter"], help="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
-    async def letters(self, ctx, psg_num: str = ""):
+    async def letters(self, ctx, psg_num: str = "", post_all: str = ""):
         bk, cha = None, None
         if any([s in psg_num for s in [":", "."]]):
             bk, cha = re.split("[:\.]", psg_num, maxsplit=1)
@@ -218,14 +222,22 @@ class Librarian(commands.Cog, name='Librarian'):
         color = 0x0000FF # Red
         if len(passage) > MAX_EMBED_LENGTH and not cha:
             to_send = split_within(passage, MAX_EMBED_LENGTH, "\n", keep_delim=True)
-            embeds = [self.generate_embed(title, t, seneca, passage_url, color) for t in to_send]
-            await self.multi_page(ctx, embeds)
+            
+            # Post every embed if "all" parameter is passed, else do flippable embed pages
+            if post_all == "all":
+                embeds = [self.generate_embed(title, to_send[0], seneca, passage_url, color)]
+                for t in to_send[1:]:
+                    embeds.append(discord.Embed(description=t, color=color))
+                await self.deletables(ctx, embeds)
+            else:
+                embeds = [self.generate_embed(title, t, seneca, passage_url, color) for t in to_send]
+                await self.multi_page(ctx, embeds)
             return
         
         embed = self.generate_embed(title, passage, seneca, passage_url, color)
         embed.set_thumbnail(url=seneca["thumbnail"])
-        messages = [await ctx.send(embed=embed)]     
-        await self.deletables(ctx, messages)
+        embeds = [embed]     
+        await self.deletables(ctx, embeds)
 
     @commands.command(name='happylife', help="Of a Happy Life by Seneca (Stewart's translation). Example: .happylife 12")
     async def happylife(self, ctx, chapter: str):
@@ -242,13 +254,13 @@ class Librarian(commands.Cog, name='Librarian'):
         to_send = split_within(passage, MAX_EMBED_LENGTH, ". ", keep_delim=True)
 
         embed = self.generate_embed(title, to_send[0], seneca, passage_url, color)
-        messages = []     
-        messages.append(await ctx.send(embed=embed))
+
+        embeds = []     
+        embeds.append(embed)
         if len(to_send) > 1:
-            # Of a Happy Life doesn't have any passages over 2 embeds long
-            embed = discord.Embed(description=to_send[1], color=color)
-            messages.append(await ctx.send(embed=embed))
-        await self.deletables(ctx, messages)
+            # Happy Life doesn't have any passages over 2 embeds long
+            embeds.append(discord.Embed(description=to_send[1], color=color))
+        await self.deletables(ctx, embeds)
 
     @commands.command(name='shortness', help="On the shortness of life by Seneca (Basore's translation). Example: .shortness 13")
     async def shortness(self, ctx, chapter: str):
@@ -265,13 +277,13 @@ class Librarian(commands.Cog, name='Librarian'):
         to_send = split_within(passage, MAX_EMBED_LENGTH, ". ", keep_delim=True)
 
         embed = self.generate_embed(title, to_send[0], seneca, passage_url, color)
-        messages = []     
-        messages.append(await ctx.send(embed=embed))
+        
+        embeds = []     
+        embeds.append(embed)
         if len(to_send) > 1:
-            # On the shortness of life doesn't have any passages over 2 embeds long
-            embed = discord.Embed(description=to_send[1], color=color)
-            messages.append(await ctx.send(embed=embed))
-        await self.deletables(ctx, messages)
+            # Enchiridion doesn't have any passages over 2 embeds long
+            embeds.append(discord.Embed(description=to_send[1], color=color))
+        await self.deletables(ctx, embeds)
 
     @commands.command(name='discourses', help="The Discourses by Epictetus (Oldfather's translation). Example: .discourses 1:21")
     async def discourses(self, ctx, psg_num: str = ""):
