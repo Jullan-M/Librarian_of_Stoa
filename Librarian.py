@@ -11,6 +11,7 @@ MAX_EMBED_LENGTH = 4096
 MULTIPAGE_TIMEOUT = 900 # Timeout period for page flipping with reacts
 
 class Librarian(commands.Cog, name='Librarian'):
+    """"Sends quotes and transcripts of public domain texts"""
     def __init__(self, bot):
         self.bot = bot
         self.multipage_timeout = MULTIPAGE_TIMEOUT
