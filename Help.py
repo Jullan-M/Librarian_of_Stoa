@@ -11,17 +11,14 @@ class Help(commands.Cog):
         self.cmds = {}
         for cmd in self.bot.walk_commands():
             self.cmds[cmd.name] = cmd
+        self.prefix = self.bot.command_prefix
 
     @commands.command(name="help", help="Displays help about Librarian of Stoa commands and functions.")
     async def help(self, ctx, *input):
         """Shows all commands of the bot"""
-	
-        # !SET THOSE VARIABLES TO MAKE THE COG FUNCTIONAL!
-        prefix = "." # ENTER YOUR PREFIX - loaded from config, as string or how ever you want!
-        version = "1.0" # enter version of your code
-        
-        # setting owner name - if you don't wanna be mentioned remove line 49-60 and adjust help text (line 88) 
-        owner_name = "Jullan#5868"	# ENTER YOUR USERNAME#1234
+
+        # Setting owner name - if you don't wanna be mentioned remove line 49-60 and adjust help text (line 88) 
+        owner_name = "Jullan#5868"
 
         title = "Help Message"
         description = f"""
@@ -34,7 +31,7 @@ class Help(commands.Cog):
             # Starting to build embed
             emb = discord.Embed(title=title, color=discord.Color.blue(), description=description)
             
-            emb.add_field(name="List of Commands", value=f"Use `{prefix}help <module/command>` to see information about a particular module/command.")
+            emb.add_field(name="List of Commands", value=f"Use `{self.prefix}help <module/command>` to see information about a particular module/command.")
             # List all unhidden commands
             for cmd_name, cmd in self.cmds.items():
                 if not cmd.hidden:
@@ -42,7 +39,7 @@ class Help(commands.Cog):
                     # If command has aliases, add those in a new line
                     if cmd.aliases:
                         value = value + "\nAliases: " + ', '.join([f"`{a}`" for a in cmd.aliases])
-                    emb.add_field(name=f"`{prefix}{cmd_name}`", value=value, inline=False)                
+                    emb.add_field(name=f"`{self.prefix}{cmd_name}`", value=value, inline=False)                
 
             # setting information about author
             emb.add_field(name="About & Support", value=f"The bot is developed and maintained by {owner_name}, and is based on py-cord. If you have any suggestions \
@@ -58,7 +55,7 @@ class Help(commands.Cog):
             # Iterating trough cogs
             if input[0] in self.cmds.keys():
                 cmd = self.cmds[input[0]]
-                title = f"Command - `{prefix}{cmd.name}`"
+                title = f"Command - `{self.prefix}{cmd.name}`"
                 description = f"{cmd.help}"
                 aliases = "\nAliases: " + ', '.join([f"`{a}`" for a in cmd.aliases])
                 emb = discord.Embed(title=title, description=description, color=discord.Color.green())
