@@ -55,11 +55,12 @@ class Help(commands.Cog):
             # Iterating trough cogs
             if input[0] in self.cmds.keys():
                 cmd = self.cmds[input[0]]
-                title = f"Command - `{self.prefix}{cmd.name}`"
+                title = f"`{self.prefix}{cmd.name}`"
                 description = f"{cmd.help}"
-                aliases = "\nAliases: " + ', '.join([f"`{a}`" for a in cmd.aliases])
                 emb = discord.Embed(title=title, description=description, color=discord.Color.green())
-                emb.set_footer(text=aliases)
+                if cmd.aliases:
+                    aliases = "\nAliases: " + ', '.join(cmd.aliases)
+                    emb.set_footer(text=aliases)
 
             # If input not found
             # yes, for-loops have an else statement, it's called when no 'break' was issued

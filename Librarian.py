@@ -124,7 +124,8 @@ class Librarian(commands.Cog, name='Librarian'):
                 await last_message.clear_reactions()
                 break
 
-    @commands.command(name='meditations', help="The Meditations by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
+    @commands.command(name='meditations', help=f"[*The Meditations*](https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus) \
+        by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
     async def meditations(self, ctx, psg_num: str = ""):
         bk, cha = None, None
         try:
@@ -159,7 +160,8 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='enchiridion', help="Enchiridion by Epictetus (Oldfather's translation). Example: .enchiridion 34")
+    @commands.command(name='enchiridion', help="[*Enchiridion*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual) \
+        by Epictetus (Oldfather's translation). Example: .enchiridion 34")
     async def enchiridion(self, ctx, chapter: str = ""):
         if not chapter:
             chapter = str(random.randrange(1,54)) # Choose a random chapter of the 53 chapters
@@ -184,7 +186,8 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='letters', aliases=["letter"], help="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
+    @commands.command(name='letters', aliases=["letter"], help="[*Moral letters to Lucilius*](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) \
+         by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
     async def letters(self, ctx, psg_num: str = "", post_all: str = ""):
         bk, cha = None, None
         if any([s in psg_num for s in [":", "."]]):
@@ -240,7 +243,8 @@ class Librarian(commands.Cog, name='Librarian'):
         embeds = [embed]     
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='happylife', help="Of a Happy Life by Seneca (Stewart's translation). Example: .happylife 12")
+    @commands.command(name='happylife', help="[*Of a Happy Life*](https://en.wikisource.org/wiki/Of_a_Happy_Life) \
+        by Seneca (Stewart's translation). Example: .happylife 12")
     async def happylife(self, ctx, chapter: str):
         if not (chapter in self.happylife):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{chapter}` in `Of a Happy Life`.")
@@ -263,7 +267,8 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='shortness', help="On the shortness of life by Seneca (Basore's translation). Example: .shortness 13")
+    @commands.command(name='shortness', help="[*On the shortness of life*](https://en.wikisource.org/wiki/On_the_shortness_of_life) \
+        by Seneca (Basore's translation). Example: .shortness 13")
     async def shortness(self, ctx, chapter: str):
         if not (chapter in self.shortness):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{chapter}` in `On the shortness of life`.")
@@ -286,7 +291,8 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='discourses', help="The Discourses by Epictetus (Oldfather's translation). Example: .discourses 1:21")
+    @commands.command(name='discourses', help="[*The Discourses*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments) \
+        by Epictetus (Oldfather's translation). Example: .discourses 1:21")
     async def discourses(self, ctx, psg_num: str = ""):
         bk, cha = None, None
         try:
