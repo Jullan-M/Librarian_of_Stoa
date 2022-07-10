@@ -1,5 +1,4 @@
 import asyncio
-from tkinter import E
 import discord
 import json
 import random
