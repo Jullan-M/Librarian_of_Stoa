@@ -27,11 +27,17 @@ class Help(commands.Cog):
         Take a look below for the list of public domain books that are currently supported. \
         """
 
+        about = f"""
+        The bot is developed and maintained by {owner_name}, and is based on py-cord. If you have any suggestions \
+        you can always @ me on servers the bot is in.\n \
+        Source code can be found on [GitHub](https://github.com/Jullan-M/Librarian_of_Stoa).\n \
+        If you're feeling generous you can donate to me on [PayPal](https://www.paypal.com/donate/?hosted_button_id=GE7JNW89XDQJN). Never necessary, but always appreciated."""
+
         if not input:
             # Starting to build embed
             emb = discord.Embed(title=title, color=discord.Color.blue(), description=description)
             
-            emb.add_field(name="List of Commands", value=f"Use `{self.prefix}help <module/command>` to see information about a particular module/command.")
+            emb.add_field(name="List of Commands", value=f"Use `{self.prefix}help <module/command>` to see information about a particular module/command. Using a command without giving it a number will send a random passage or chapter from that book.")
             # List all unhidden commands
             for cmd_name, cmd in self.cmds.items():
                 if not cmd.hidden:
@@ -42,10 +48,7 @@ class Help(commands.Cog):
                     emb.add_field(name=f"`{self.prefix}{cmd_name}`", value=value, inline=False)                
 
             # setting information about author
-            emb.add_field(name="About & Support", value=f"The bot is developed and maintained by {owner_name}, and is based on py-cord. If you have any suggestions \
-                                    you can always @ me on servers the bot is in.\n \
-                                    Source code can be found on [GitHub](https://github.com/Jullan-M/Librarian_of_Stoa).\n \
-                                    If you're feeling generous you can donate to me on [PayPal](https://www.paypal.com/donate/?hosted_button_id=GE7JNW89XDQJN). Never necessary, but always appreciated.")
+            emb.add_field(name="About & Support", value=about)
             emb.set_footer(text=f"Developed by {owner_name}")
 
         # Block called when one command-name is given
