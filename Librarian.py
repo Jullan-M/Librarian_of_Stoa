@@ -328,7 +328,9 @@ class Librarian(commands.Cog, name='Librarian'):
     async def random(self, ctx):
         # Put every function in the library in to a list
         functions = [self.enchiridion, self.discourses, self.meditations, self.shortness, self.happylife, self.letters]
-        await random.choice(functions)(ctx)
+        func = random.choice(functions)
+        print(f"Choosing a random chapter/passage from {func.name}")
+        await func(ctx)
 
 def setup(bot):
     bot.add_cog(Librarian(bot))

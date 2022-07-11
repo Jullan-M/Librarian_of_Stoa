@@ -48,8 +48,8 @@ def split_within(text: str, max_len: int, delims: str, keep_delim: bool = False)
             splitted_even_more = split_within(s, max_len, delims[1:], keep_delim)
             splitted.extend(splitted_even_more)
 
-    #split_lens = [len(s) for s in splitted]
-    #print(split_lens)
+    split_lens = [len(s) for s in splitted]
+    # print(split_lens)
 
     parts = []
     i = 0
@@ -60,6 +60,7 @@ def split_within(text: str, max_len: int, delims: str, keep_delim: bool = False)
                 part = part + delim
             parts.append(part)
             i = j-1
+    
     parts.append(delim.join(splitted[i:]))
     return parts
 
