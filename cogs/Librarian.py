@@ -26,7 +26,7 @@ class Librarian(commands.Cog, name='Librarian'):
         self.hap = load_json("books/happylife.json") # Happy Life
         self.short = load_json("books/shortness.json") # Shortness of life
         self.disc = load_json("books/discourses.json") # The Discourses
-        self.media = load_json("media.json")
+        self.media = load_json("books/media.json")
 
     @staticmethod
     def generate_embed(title, passage, author_data, passage_url, color):

@@ -2,8 +2,8 @@ import asyncio
 import os
 from dotenv import load_dotenv
 from discord.ext import commands
-from Librarian import Librarian
-from Help import Help
+from cogs.Librarian import Librarian
+from cogs.Help import Help
 
 load_dotenv(dotenv_path='.env')
 TOKEN = os.getenv('DISCORD_TOKEN')
