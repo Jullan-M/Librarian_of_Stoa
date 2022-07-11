@@ -30,13 +30,26 @@ def int2roman(n: int) -> str:
                 break
     return roman
 
-def split_within(text: str, max_len: int, delim: str, keep_delim: bool = False) -> list:
+def split_within(text: str, max_len: int, delims: str, keep_delim: bool = False) -> list:
     # Splits a long text into parts such that all string are within max_len length.
     if len(text) <= max_len:
         return [text]
     
-    splitted = text.split(delim)
-    split_lens = [len(s) for s in splitted]
+    delim = delims[0]
+    
+    spl = text.split(delim)
+
+    splitted = []
+    split_lens = []
+    for i, s in enumerate(spl):
+        if len(s) <= max_len:
+            splitted.append(s)
+        else:
+            splitted_even_more = split_within(s, max_len, delims[1:], keep_delim)
+            splitted.extend(splitted_even_more)
+
+    #split_lens = [len(s) for s in splitted]
+    #print(split_lens)
 
     parts = []
     i = 0
@@ -48,7 +61,6 @@ def split_within(text: str, max_len: int, delim: str, keep_delim: bool = False) 
             parts.append(part)
             i = j-1
     parts.append(delim.join(splitted[i:]))
-    
     return parts
 
 def uniform_random_choice_from_dict(books: dict):

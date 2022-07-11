@@ -17,21 +17,16 @@ class Help(commands.Cog):
     async def help(self, ctx, *input):
         """Shows all commands of the bot"""
 
-        # Setting owner name - if you don't wanna be mentioned remove line 49-60 and adjust help text (line 88) 
         owner_name = "Jullan#5868"
 
         title = "Help Message"
         description = f"""
-        Librarian of Stoa is a bot that finds and quotes passages of some classical era philosophers, in particular the Stoics. \
-        The bot then sends them in a beautiful embedded format on Discord. \
-        Take a look below for the list of public domain books that are currently supported. \
+        Librarian of Stoa is a bot that finds and quotes passages of some classical era philosophers, in particular the Stoics. The bot then sends them in a beautiful embedded format on Discord. Take a look below for the list of public domain books that are currently supported.
         """
 
         about = f"""
-        The bot is developed and maintained by {owner_name}, and is based on py-cord. If you have any suggestions \
-        you can always @ me on servers the bot is in.\n \
-        Source code can be found on [GitHub](https://github.com/Jullan-M/Librarian_of_Stoa).\n \
-        If you're feeling generous you can donate to me on [PayPal](https://www.paypal.com/donate/?hosted_button_id=GE7JNW89XDQJN). Never necessary, but always appreciated."""
+        The bot is developed and maintained by {owner_name}, and is based on py-cord. If you have any suggestions you can always @ me on servers the bot is in.\nSource code can be found on [GitHub](https://github.com/Jullan-M/Librarian_of_Stoa).\nIf you're feeling generous you can donate to me on [PayPal](https://www.paypal.com/donate/?hosted_button_id=GE7JNW89XDQJN). Never necessary, but always appreciated.
+        """
 
         if not input:
             # Starting to build embed
@@ -45,7 +40,7 @@ class Help(commands.Cog):
                     # If command has aliases, add those in a new line
                     if cmd.aliases:
                         value = value + "\nAliases: " + ', '.join([f"`{a}`" for a in cmd.aliases])
-                    emb.add_field(name=f"`{self.prefix}{cmd_name}`", value=value, inline=False)                
+                    emb.add_field(name=f"`{self.prefix}{cmd_name} {' '.join('<' + a[0] + '>' for a in cmd.clean_params.items())}`", value=value, inline=False)                
 
             # setting information about author
             emb.add_field(name="About & Support", value=about)
@@ -58,7 +53,7 @@ class Help(commands.Cog):
             # Iterating trough cogs
             if input[0] in self.cmds.keys():
                 cmd = self.cmds[input[0]]
-                title = f"`{self.prefix}{cmd.name}`"
+                title = f"`{self.prefix}{cmd.name} {' '.join('<' + a[0] + '>' for a in cmd.clean_params.items())}`"
                 description = f"{cmd.help}"
                 emb = discord.Embed(title=title, description=description, color=discord.Color.green())
                 if cmd.aliases:
