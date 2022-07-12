@@ -183,7 +183,7 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='letters', aliases=["letter"], help="[*Moral letters to Lucilius*](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) by Seneca (Gummere's translation). Example: .letters 99:3-6 gives §3-6 from Letter 99")
+    @commands.command(name='letters', aliases=["letter"], help="[*Moral letters to Lucilius*](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) by Seneca (Gummere's translation). Example: `.letters 99:3-6` gives §3-6 from Letter 99. `.letters 19 all` spews out all pages of letter 19 at once.")
     async def letters(self, ctx, bk_ch: str = "", post_all: str = ""):
         bk, cha = None, None
         if any([s in bk_ch for s in [":", "."]]):
