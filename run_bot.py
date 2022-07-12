@@ -1,5 +1,6 @@
 import asyncio
 import os
+import discord
 from dotenv import load_dotenv
 from discord.ext import commands
 from cogs.Librarian import Librarian
@@ -8,7 +9,11 @@ from cogs.Help import Help
 load_dotenv(dotenv_path='.env')
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot(command_prefix=".")
+# Configure intents
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = commands.Bot(command_prefix = ".", intents = intents)
 bot.remove_command('help')
 bot.add_cog(Librarian(bot))
 bot.add_cog(Help(bot))
