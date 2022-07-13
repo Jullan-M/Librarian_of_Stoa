@@ -54,33 +54,40 @@ class Librarian(commands.Cog, name='Librarian'):
             nonlocal message
             return user == ctx.author and reaction.message.id==message.id and str(reaction.emoji) in valid_emoji
             
-
         while True:
             try:
                 # wait for a reaction to be added
                 # times out after MULTIPAGE_TIMEOUT seconds
                 reaction, user = await self.bot.wait_for("reaction_add", timeout=self.multipage_timeout, check=check)
                 
-                if str(reaction.emoji) == "▶️" and cur_page != pages-1:
-                    cur_page += 1
+                if str(reaction.emoji) == "▶️":
+                    # Next page
+                    if cur_page == pages - 1: # If current page is the last page, wrap around to the first page
+                        cur_page = 0
+                    else: # Else just flip to the next
+                        cur_page += 1
                     await message.edit(embed=embeds[cur_page])
                     await message.remove_reaction(reaction, user)
 
-                elif str(reaction.emoji) == "◀️" and cur_page > 0:
-                    cur_page -= 1
+                elif str(reaction.emoji) == "◀️":
+                    # Previous page
+                    if cur_page == 0: # If current page is the first page, wrap around to the last page
+                        cur_page = pages - 1
+                    else: # Else just flip back to the previous
+                        cur_page -= 1
                     await message.edit(embed=embeds[cur_page])
                     await message.remove_reaction(reaction, user)
+                
                 elif str(reaction.emoji) == "🗑️":
                     # Bot messages can be deleted by reacting with the waste basket emoji
                     await message.delete()
                     break
-                else:
-                    # remove reactions if the user tries to go forward on the last page or
-                    # backwards on the first page
-                    await message.remove_reaction(reaction, user)
+                
             except (asyncio.TimeoutError, discord.errors.Forbidden):
-                # end the loop if user doesn't react after MULTIPAGE_TIMEOUT seconds
-                for r in valid_emoji: await message.remove_reaction(r, self.bot.user)
+                # End the loop if user doesn't react after MULTIPAGE_TIMEOUT seconds
+                for r in valid_emoji:
+                    # Remove bot's reactions first in case there are missing perms
+                    await message.remove_reaction(r, self.bot.user)
                 await message.clear_reactions()
                 break
 
