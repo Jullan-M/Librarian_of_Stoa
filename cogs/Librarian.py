@@ -329,7 +329,7 @@ class Librarian(commands.Cog, name='Librarian'):
         
         embed = self.generate_embed(title, passage, epictetus, passage_url, color)
         embed.set_thumbnail(url=epictetus["thumbnail"])        
-        await ctx.send(embed=embed)
+        await self.deletables(ctx, [embed])
 
     @commands.command(name='random', help="Posts a random passage or chapter from any of the available books.")
     async def random(self, ctx):
