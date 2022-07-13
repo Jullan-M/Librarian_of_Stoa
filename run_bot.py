@@ -26,15 +26,29 @@ def is_guild_owner():
 @bot.command(name='add_cog', hidden=True)
 @commands.check_any(commands.is_owner(), is_guild_owner())
 async def add_cog(ctx, cog_name: str):
-    bot.load_extension(cog_name)
+    try:
+        cog_dc = bot.load_extension(f"cogs.{cog_name}", store = False)
+    except discord.ExtensionNotFound:
+        await ctx.send(f"No cog found with the name: `{cog_name}`")
+        return
+    except discord.ExtensionAlreadyLoaded:
+        await ctx.send(f"`{cog_name}` is already loaded.")
+        return
     print(f"Loaded cog: {cog_name}")
-    await ctx.send(f"Added cog {cog_name}.")
+    await ctx.send(f"Added cog `{cog_name}`.")
 
 @bot.command(name='remove_cog', hidden=True)
 @commands.check_any(commands.is_owner(), is_guild_owner())
 async def remove_cog(ctx, cog_name: str):
-    bot.remove_cog(cog_name)
-    print(f"Removed cog: {cog_name}")
-    await ctx.send(f"Removed cog {cog_name}.")
+    cog = bot.remove_cog(cog_name)
+    if not cog:
+        await ctx.send(f"No cog loaded with the name: `{cog_name}`")
+        return
+    print(f"Removed cog: {cog.qualified_name}")
+    await ctx.send(f"Removed cog `{cog.qualified_name}`.")
+
+@bot.event
+async def on_ready():
+    print(f"--- {bot.user.name} ready ---")
 
 bot.run(TOKEN)
