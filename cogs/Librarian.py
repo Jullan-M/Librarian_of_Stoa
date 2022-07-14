@@ -27,6 +27,7 @@ class Librarian(commands.Cog, name='Librarian'):
         self.short = load_json("books/shortness.json") # Shortness of life
         self.disc = load_json("books/discourses.json") # The Discourses
         self.media = load_json("books/media.json")
+        self.toc = load_json("books/toc.json")
 
     @staticmethod
     def generate_embed(title, passage, author_data, passage_url, color):
@@ -338,6 +339,28 @@ class Librarian(commands.Cog, name='Librarian'):
         func = random.choice(functions)
         print(f"Choosing a random chapter/passage from {func.name}")
         await func(ctx)
+
+    @commands.command(name='toc', aliases=["tableofcontents"], help="Shows table of contents (if any) of a given book. Example: .toc letters")
+    async def table_of_contents(self, ctx, title: str):
+        try:
+            book_data = self.toc[title]
+        except KeyError:
+            await ctx.send(f"No table of contents was found for `{title}`")
+            return
+        author = book_data["author"]
+        author_media = self.media[author]
+        color = discord.Color.orange()
+        heading = f"Table of Contents - {book_data['name']}"
+        description = book_data["description"]
+
+        embeds = []
+        for vol, chaps in book_data["contents"].items():
+            chapters = '\n'.join(chaps)
+            toc_text = f"\n\n__**{vol}**__\n{chapters}"
+            embed = discord.Embed(title = heading, description = description + toc_text, color = color, url = author_media[title])
+            embeds.append(embed)
+        await self.multi_page(ctx, embeds)
+        
 
 def setup(bot):
     bot.add_cog(Librarian(bot))
