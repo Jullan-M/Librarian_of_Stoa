@@ -196,6 +196,8 @@ class Librarian(commands.Cog, name='Librarian'):
         bk, cha = None, None
         if any([s in bk_ch for s in [":", "."]]):
             bk, cha = re.split("[:\.]", bk_ch, maxsplit=1)
+        elif bk_ch == "toc": # Shows table of contents
+            return await self.table_of_contents(ctx, "letters")
         else:
             bk = bk_ch
         
@@ -304,6 +306,8 @@ class Librarian(commands.Cog, name='Librarian'):
         try:
             if not bk_ch:
                 bk, cha = uniform_random_choice_from_dict(self.disc)
+            elif bk_ch == "toc": # Shows table of contents
+                return await self.table_of_contents(ctx, "discourses")
             else:
                 bk, cha = re.split("[:\.]", bk_ch, maxsplit=1)
         except ValueError:
