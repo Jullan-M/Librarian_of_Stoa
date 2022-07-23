@@ -337,7 +337,7 @@ class Librarian(commands.Cog, name='Librarian'):
         embed.set_thumbnail(url=epictetus["thumbnail"])        
         await self.deletables(ctx, [embed])
 
-    @commands.command(name='anger', aliases=["ofanger", "onanger"], help="[*Of Anger*](https://en.wikisource.org/wiki/Of_Anger) by Seneca (Aubrey Stewart translation). Example: .anger 2:10")
+    @commands.command(name='anger', aliases=["ofanger", "onanger"], help="[*Of Anger*](https://en.wikisource.org/wiki/Of_Anger) by Seneca (Stewart's translation). Example: .anger 2:10")
     async def anger(self, ctx, bk_ch: str = ""):
         bk, cha = None, None
         try:
