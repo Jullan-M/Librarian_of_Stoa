@@ -148,6 +148,51 @@ def fetch_discourses():
     with open("books/discourses.json", "w", encoding="utf-8") as f:
         f.write(json.dumps(books, indent="\t", ensure_ascii=False))
 
+def fetch_anger():
+    books = {}
+    chapters = [21, 36, 43]
+
+    for i, chaps in enumerate(chapters):
+        print(f"Fetching \"On Anger\" Book {i+1}", end="\r")
+        url = f"https://en.wikisource.org/wiki/Of_Anger/Book_{int2roman(i+1)}"
+        results = scrape_by_class(url, "mw-parser-output")[-1]
+        # Remove superfluous stuff
+        results.find("div", class_="ws-noexport noprint dynlayout-exempt").extract() # Shave off book info
+        front  = results.find_all("div", class_="wst-center")
+        edits = results.find_all("span", class_="mw-editsection")
+        references = results.find_all("sup", class_="reference")
+        for f in front: f.extract() # Shave off frontmatter
+        for e in edits: e.extract() # Shave off "edit" prompts
+        for r in references: r.extract() # Shave off reference numbering
+        results.find("table", class_="__smalltoc").extract() # Shave off small toc
+        results = results.find_all(["h2", "p", "dd"]) # Headers, paragraphs and centered quotes
+        results = results[:-2] # Shave off footnotes
+        
+        # Fill book
+        book = {}
+        headindex = 1
+        text = ""
+        for soup in results[1:]:
+            if soup.find("span", class_="mw-headline"):
+                # Replace single linebreaks with double using regex negative lookbehind and lookahead
+                text = re.sub("(?<!\n)\n(?!\n)", "\n\n", text)
+                book[headindex] = text.strip()
+                text = ""
+                headindex += 1
+                continue
+
+            if not (soup.text in text):
+                if soup.find("dd") or soup.find("dl"):
+                    text += soup.text + "\n"
+                else:
+                    text += soup.text
+            
+        book[headindex] = text.lstrip() # Last page
+        books[i+1] = book
+
+    with open("books/anger.json", "w", encoding="utf-8") as f:
+        f.write(json.dumps(books, indent="\t", ensure_ascii=False))
+
 if __name__ == "__main__":
     to_fetch = [
         fetch_meditations, 
@@ -155,7 +200,8 @@ if __name__ == "__main__":
         fetch_letters,
         fetch_happylife, 
         fetch_shortness, 
-        fetch_discourses
+        fetch_discourses,
+        fetch_anger
     ]
     
     for f in to_fetch:

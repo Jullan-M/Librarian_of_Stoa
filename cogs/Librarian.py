@@ -26,6 +26,7 @@ class Librarian(commands.Cog, name='Librarian'):
         self.hap = load_json("books/happylife.json") # Happy Life
         self.short = load_json("books/shortness.json") # Shortness of life
         self.disc = load_json("books/discourses.json") # The Discourses
+        self.ang = load_json("books/anger.json") # Of Anger
         self.media = load_json("books/media.json")
         self.toc = load_json("books/toc.json")
 
@@ -314,10 +315,10 @@ class Librarian(commands.Cog, name='Librarian'):
             return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
             
         if not (bk in self.disc):
-            return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` in The Discourses (or it may have been lost to time 😢).")
+            return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` in *The Discourses* (or it may have been lost to time 😢).")
             
         if not (cha in self.disc[bk]):
-            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of The Discourses.")
+            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of *The Discourses*.")
         
         title, passage = self.disc[bk][cha].split("\n", maxsplit=1)
         title = f"The Discourses – Book {int2roman(int(bk))}, Chapter {cha}\n{title}"
@@ -336,10 +337,46 @@ class Librarian(commands.Cog, name='Librarian'):
         embed.set_thumbnail(url=epictetus["thumbnail"])        
         await self.deletables(ctx, [embed])
 
+    @commands.command(name='anger', aliases=["ofanger", "onanger"], help="[*Of Anger*](https://en.wikisource.org/wiki/Of_Anger) by Seneca (Aubrey Stewart translation). Example: .anger 2:10")
+    async def anger(self, ctx, bk_ch: str = ""):
+        bk, cha = None, None
+        try:
+            if not bk_ch:
+                bk, cha = uniform_random_choice_from_dict(self.disc)
+            else:
+                bk, cha = re.split("[:\.]", bk_ch, maxsplit=1)
+        except ValueError:
+            return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
+            
+        if not (bk in self.disc):
+            return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` in *Of Anger*.")
+            
+        if not (cha in self.disc[bk]):
+            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` in *Of Anger*.")
+
+        roman_num = int2roman(int(bk))
+        title = f"Of Anger: Book {roman_num} Chapter {cha}"
+        passage = self.ang[bk][cha]
+        seneca = self.media["seneca"]
+        passage_url = f"{seneca['anger']}/Book_{roman_num}#{int2roman(int(cha))}."
+
+        color = 0x00FFFF
+        to_send = split_within(passage, MAX_EMBED_LENGTH, ["\n", ". "], keep_delim=True)
+
+        embed = self.generate_embed(title, to_send[0], seneca, passage_url, color)
+        
+        embeds = []     
+        embeds.append(embed)
+        if len(to_send) > 1:
+            # Of Anger doesn't have any passages over 2 embeds long
+            embeds.append(discord.Embed(description=to_send[1], color=color))
+        await self.deletables(ctx, embeds)
+        
+
     @commands.command(name='random', help="Posts a random passage or chapter from any of the available books.")
     async def random(self, ctx):
         # Put every function in the library in to a list
-        functions = [self.enchiridion, self.discourses, self.meditations, self.shortness, self.happylife, self.letters]
+        functions = [self.enchiridion, self.discourses, self.meditations, self.shortness, self.happylife, self.letters, self.anger]
         func = random.choice(functions)
         print(f"Choosing a random chapter/passage from {func.name}")
         await func(ctx)
