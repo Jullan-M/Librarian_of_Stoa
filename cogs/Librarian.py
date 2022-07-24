@@ -20,15 +20,19 @@ class Librarian(commands.Cog, name='Librarian'):
                 js = json.load(f)
             return js
 
-        self.med = load_json("books/meditations.json") # Meditations
-        self.ench = load_json("books/enchiridion.json") # Enchiridion
-        self.let = load_json("books/letters.json") # Letters
-        self.hap = load_json("books/happylife.json") # Happy Life
-        self.short = load_json("books/shortness.json") # Shortness of life
-        self.disc = load_json("books/discourses.json") # The Discourses
-        self.ang = load_json("books/anger.json") # Of Anger
-        self.media = load_json("books/media.json")
-        self.toc = load_json("books/toc.json")
+        books = [
+            "meditations", # Meditations
+            "enchiridion", # Enchiridion
+            "letters", # Letters
+            "happylife", # Happy Life
+            "shortness", # Shortness of life
+            "discourses", # The Discourses
+            "anger", # Of Anger
+            "media", # Author information and wikisource links
+            "toc" # Table of Contents for some books
+        ]
+
+        self.lib = {b: load_json(f"books/{b}.json") for b in books}
 
     @staticmethod
     def generate_embed(title, passage, author_data, passage_url, color):
@@ -137,21 +141,21 @@ class Librarian(commands.Cog, name='Librarian'):
         bk, cha = None, None
         try:
             if not bk_ch:
-                bk, cha = uniform_random_choice_from_dict(self.med)
+                bk, cha = uniform_random_choice_from_dict(self.lib["meditations"])
             else:
                 bk, cha = re.split("[:\.]", bk_ch, maxsplit=1)
         except ValueError:
             return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `5:23` for Book 5, Chapter 23.")
             
-        if not (bk in self.med):
+        if not (bk in self.lib["meditations"]):
             return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` of Meditations.")
             
-        if not (cha in self.med[bk]):
+        if not (cha in self.lib["meditations"][bk]):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of Meditations.")
         
         title = f"Meditations {bk}:{cha}"
-        passage = self.med[bk][cha].rstrip()
-        aurelius = self.media["aurelius"] # author data
+        passage = self.lib["meditations"][bk][cha].rstrip()
+        aurelius = self.lib["media"]["aurelius"] # author data
         passage_url = f"{aurelius['meditations']}/Book_{bk}"
         color = 0xFF0000 # Red
 
@@ -171,12 +175,12 @@ class Librarian(commands.Cog, name='Librarian'):
     async def enchiridion(self, ctx, chapter: str = ""):
         if not chapter:
             chapter = str(random.randrange(1,54)) # Choose a random chapter of the 53 chapters
-        elif not (chapter in self.ench):
+        elif not (chapter in self.lib["enchiridion"]):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{chapter}` in The Enchiridion.")
         
         title = f"Enchiridion {chapter}"
-        passage = self.ench[chapter].rstrip()
-        epictetus = self.media["epictetus"]
+        passage = self.lib["enchiridion"][chapter].rstrip()
+        epictetus = self.lib["media"]["epictetus"]
         passage_url = epictetus["enchiridion"]
         color = 0x00FF00 # Green
 
@@ -204,30 +208,30 @@ class Librarian(commands.Cog, name='Librarian'):
         
         if not bk:
             bk = str(random.randrange(1,125)) # Choose a random letter of the 124 letters
-        elif not (bk in self.let):
+        elif not (bk in self.lib["letters"]):
             return await ctx.send(f"{ctx.author.mention}, there is no letter `{bk}` of the Moral letters.")
         
         passage = None
-        seneca = self.media["seneca"]
+        seneca = self.lib["media"]["seneca"]
         if cha:
             if "-" in cha:
                 cha1, cha2 = cha.split("-", maxsplit=1)
-                if not 0 < int(cha1) < int(cha2) or not (cha1 in self.let[bk] and cha2 in self.let[bk]):
+                if not 0 < int(cha1) < int(cha2) or not (cha1 in self.lib["letters"][bk] and cha2 in self.lib["letters"][bk]):
                     return await ctx.send(f"{ctx.author.mention}, `{cha1}-{cha2}` is not a valid range.")
-                passage = " ".join([self.let[bk][str(ch)] for ch in range(int(cha1), int(cha2) + 1)]).rstrip()
+                passage = " ".join([self.lib["letters"][bk][str(ch)] for ch in range(int(cha1), int(cha2) + 1)]).rstrip()
             else:
-                if not (int(cha) > 0 and cha in self.let[bk]):
+                if not (int(cha) > 0 and cha in self.lib["letters"][bk]):
                     return await ctx.send(f"{ctx.author.mention}, there is no paragraph `{cha}` in letter `{bk}` of the Moral letters.")
-                passage = self.let[bk][cha].rstrip()
+                passage = self.lib["letters"][bk][cha].rstrip()
         else:
-            letter_passages = list(self.let[bk].values())[1:]
+            letter_passages = list(self.lib["letters"][bk].values())[1:]
             passage = "".join(letter_passages)
         title = f"Moral letters to Lucilius: Letter {bk}"
         
         if cha:
             title += f", §{cha}"
         else:
-            title += f"\n{self.let[bk]['0']}"
+            title += f"\n{self.lib['letters'][bk]['0']}"
 
         passage_url = f"{seneca['letters']}/Letter_{bk}"
         color = 0x0000FF # Red
@@ -254,13 +258,13 @@ class Librarian(commands.Cog, name='Librarian'):
     async def happylife(self, ctx, chapter: str = ""):
         if not chapter:
             chapter = str(random.randrange(1,29)) # Choose a random chapter of the 28 chapters
-        elif not (chapter in self.hap):
+        elif not (chapter in self.lib["happylife"]):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{chapter}` in `Of a Happy Life`.")
         
         roman_num = int2roman(int(chapter))
         title = f"Of a Happy Life: Book {roman_num}"
-        passage = self.hap[chapter]
-        seneca = self.media["seneca"]
+        passage = self.lib["happylife"][chapter]
+        seneca = self.lib["media"]["seneca"]
         passage_url = f"{seneca['happylife']}/Book_{roman_num}"
         
         color = 0x00FFFF # Red
@@ -280,13 +284,13 @@ class Librarian(commands.Cog, name='Librarian'):
     async def shortness(self, ctx, chapter: str = ""):
         if not chapter:
             chapter = str(random.randrange(1,21)) # Choose a random chapter of the 21 chapters
-        elif not (chapter in self.short):
+        elif not (chapter in self.lib["shortness"]):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{chapter}` in `On the shortness of life`.")
         
         roman_num = int2roman(int(chapter))
         title = f"On the shortness of life: Chapter {roman_num}"
-        passage = self.short[chapter]
-        seneca = self.media["seneca"]
+        passage = self.lib["shortness"][chapter]
+        seneca = self.lib["media"]["seneca"]
         passage_url = f"{seneca['shortness']}/Chapter_{roman_num}"
 
         color = 0x00FFFF # Red
@@ -306,7 +310,7 @@ class Librarian(commands.Cog, name='Librarian'):
         bk, cha = None, None
         try:
             if not bk_ch:
-                bk, cha = uniform_random_choice_from_dict(self.disc)
+                bk, cha = uniform_random_choice_from_dict(self.lib["discourses"])
             elif bk_ch == "toc": # Shows table of contents
                 return await self.table_of_contents(ctx, "discourses")
             else:
@@ -314,16 +318,16 @@ class Librarian(commands.Cog, name='Librarian'):
         except ValueError:
             return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
             
-        if not (bk in self.disc):
+        if not (bk in self.lib["discourses"]):
             return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` in *The Discourses* (or it may have been lost to time 😢).")
             
-        if not (cha in self.disc[bk]):
+        if not (cha in self.lib["discourses"][bk]):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of *The Discourses*.")
         
-        title, passage = self.disc[bk][cha].split("\n", maxsplit=1)
+        title, passage = self.lib["discourses"][bk][cha].split("\n", maxsplit=1)
         title = f"The Discourses – Book {int2roman(int(bk))}, Chapter {cha}\n{title}"
         passage = passage.lstrip()
-        epictetus = self.media["epictetus"] # author data
+        epictetus = self.lib["media"]["epictetus"] # author data
         passage_url = f"{epictetus['discourses']}/Book_{bk}/Chapter_{cha}"
         color = 0x00FF00 # Green
 
@@ -342,22 +346,22 @@ class Librarian(commands.Cog, name='Librarian'):
         bk, cha = None, None
         try:
             if not bk_ch:
-                bk, cha = uniform_random_choice_from_dict(self.disc)
+                bk, cha = uniform_random_choice_from_dict(self.lib["discourses"])
             else:
                 bk, cha = re.split("[:\.]", bk_ch, maxsplit=1)
         except ValueError:
             return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
             
-        if not (bk in self.disc):
+        if not (bk in self.lib["discourses"]):
             return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` in *Of Anger*.")
             
-        if not (cha in self.disc[bk]):
+        if not (cha in self.lib["discourses"][bk]):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` in *Of Anger*.")
 
         roman_num = int2roman(int(bk))
         title = f"Of Anger: Book {roman_num} Chapter {cha}"
-        passage = self.ang[bk][cha]
-        seneca = self.media["seneca"]
+        passage = self.lib["anger"][bk][cha]
+        seneca = self.lib["media"]["seneca"]
         passage_url = f"{seneca['anger']}/Book_{roman_num}#{int2roman(int(cha))}."
 
         color = 0x00FFFF
@@ -384,12 +388,12 @@ class Librarian(commands.Cog, name='Librarian'):
     @commands.command(name='toc', aliases=["tableofcontents"], help="Shows table of contents (if any) of a given book. Example: .toc letters")
     async def table_of_contents(self, ctx, title: str):
         try:
-            book_data = self.toc[title]
+            book_data = self.lib["toc"][title]
         except KeyError:
             await ctx.send(f"No table of contents was found for `{title}`")
             return
         author = book_data["author"]
-        author_media = self.media[author]
+        author_media = self.lib["media"][author]
         color = discord.Color.orange()
         heading = f"Table of Contents - {book_data['name']}"
         description = book_data["description"]
