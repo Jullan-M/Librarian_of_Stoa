@@ -1,26 +1,27 @@
 {
-    "aurelius": {
-        "name": "Marcus Aurelius",
-        "icon": "https://upload.wikimedia.org/wikipedia/commons/4/41/Young_Folks%27_History_of_Rome_illus326.png",
-        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Marcus_Aurelius_Metropolitan_Museum.png",
-        "url": "https://en.wikisource.org/wiki/Author:Marcus_Aurelius_Antoninus",
-        "meditations": "https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus"
-    },
-    "epictetus": {
-        "name": "Epictetus",
-        "icon": "https://upload.wikimedia.org/wikipedia/commons/3/39/Epictetus_from_L._Annaei_Senecae_philosophi_Opera%2C_1605%2C_title_page_detail.png",
-        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Epicteti_Enchiridion_Latinis_versibus_adumbratum_%28Oxford_1715%29_frontispiece.jpg/678px-Epicteti_Enchiridion_Latinis_versibus_adumbratum_%28Oxford_1715%29_frontispiece.jpg",
-        "url": "https://en.wikisource.org/wiki/Author:Epictetus",
-        "enchiridion": "https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual",
-        "discourses": "https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments"
-    },
-    "seneca": {
-        "name": "Seneca the Younger",
-        "icon": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Seneca.jpg",
-        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pseudo-Seneca_Louvre_Ma921.jpg/1024px-Pseudo-Seneca_Louvre_Ma921.jpg",
-        "url": "https://en.wikisource.org/wiki/Author:Seneca",
-        "letters": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius",
-        "happylife": "https://en.wikisource.org/wiki/Of_a_Happy_Life",
-        "shortness": "https://en.wikisource.org/wiki/On_the_shortness_of_life"
-    }
+  "aurelius": {
+    "name": "Marcus Aurelius",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/4/41/Young_Folks%27_History_of_Rome_illus326.png",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Marcus_Aurelius_Metropolitan_Museum.png",
+    "url": "https://en.wikisource.org/wiki/Author:Marcus_Aurelius_Antoninus",
+    "meditations": "https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus"
+  },
+  "epictetus": {
+    "name": "Epictetus",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/3/39/Epictetus_from_L._Annaei_Senecae_philosophi_Opera%2C_1605%2C_title_page_detail.png",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Epicteti_Enchiridion_Latinis_versibus_adumbratum_%28Oxford_1715%29_frontispiece.jpg/678px-Epicteti_Enchiridion_Latinis_versibus_adumbratum_%28Oxford_1715%29_frontispiece.jpg",
+    "url": "https://en.wikisource.org/wiki/Author:Epictetus",
+    "enchiridion": "https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual",
+    "discourses": "https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments"
+  },
+  "seneca": {
+    "name": "Seneca the Younger",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Seneca.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pseudo-Seneca_Louvre_Ma921.jpg/1024px-Pseudo-Seneca_Louvre_Ma921.jpg",
+    "url": "https://en.wikisource.org/wiki/Author:Seneca",
+    "letters": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius",
+    "happylife": "https://en.wikisource.org/wiki/Of_a_Happy_Life",
+    "shortness": "https://en.wikisource.org/wiki/On_the_shortness_of_life",
+    "anger": "https://en.wikisource.org/wiki/Of_Anger"
+  }
 }
