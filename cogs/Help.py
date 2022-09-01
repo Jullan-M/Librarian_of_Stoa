@@ -10,6 +10,7 @@ class Help(commands.Cog):
         for cmd in self.bot.walk_commands():
             self.cmds[cmd.name] = cmd
         self.prefix = self.bot.command_prefix
+        self.bot.remove_command('help')
 
     @commands.command(name="help", help="Displays help about Librarian of Stoa commands and functions.")
     async def help(self, ctx, *input):
