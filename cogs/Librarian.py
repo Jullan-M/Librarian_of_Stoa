@@ -153,7 +153,7 @@ class Librarian(commands.Cog, name='Librarian'):
         if not (cha in self.lib["meditations"][bk]):
             return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of Meditations.")
         
-        title = f"Meditations {bk}:{cha}"
+        title = f"Meditations {bk}.{cha}"
         passage = self.lib["meditations"][bk][cha].rstrip()
         aurelius = self.lib["media"]["aurelius"] # author data
         passage_url = f"{aurelius['meditations']}/Book_{bk}"
