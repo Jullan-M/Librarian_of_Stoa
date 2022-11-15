@@ -159,6 +159,9 @@ class Librarian(commands.Cog, name='Librarian'):
         passage_url = f"{aurelius['meditations']}/Book_{bk}"
         color = 0xFF0000 # Red
 
+        # Add link to comparison of translations
+        passage = passage + f"\n\n[Other translations](https://www.stoicsource.com/aurelius/meditations/{bk}.{int(cha):02d}/farquharson)"
+
         to_send = split_within(passage, MAX_EMBED_LENGTH, ["\n", ". "], keep_delim=True)
         
         embed = self.generate_embed(title, to_send[0], aurelius, passage_url, color)
@@ -183,6 +186,9 @@ class Librarian(commands.Cog, name='Librarian'):
         epictetus = self.lib["media"]["epictetus"]
         passage_url = epictetus["enchiridion"]
         color = 0x00FF00 # Green
+
+        # Add link to comparison of translations
+        passage = passage + f"\n\n[Compare translations](https://enchiridion.tasuki.org/display:Code:ec,twh,pem,sw/section:{chapter})"
 
         to_send = split_within(passage, MAX_EMBED_LENGTH, ["\n", ". "], keep_delim=True)
         
