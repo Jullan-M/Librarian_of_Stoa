@@ -256,7 +256,7 @@ class Librarian(commands.Cog, name='Librarian'):
             return
         
         embed = self.generate_embed(title, passage, seneca, passage_url, color)
-        embed.set_thumbnail(url=seneca["thumbnail"])
+        #embed.set_thumbnail(url=seneca["thumbnail"])
         embeds = [embed]     
         await self.deletables(ctx, embeds)
 
