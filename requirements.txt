@@ -1,3 +1,3 @@
-beautifulsoup4
-python-dotenv
 py-cord
+python-dotenv
+beautifulsoup4

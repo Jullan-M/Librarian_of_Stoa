@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import bridge, commands
 
 class Help(commands.Cog):
     """ Sends this help message """
@@ -12,8 +12,12 @@ class Help(commands.Cog):
         self.prefix = self.bot.command_prefix
         self.bot.remove_command('help')
 
-    @commands.command(name="help", help="Displays help about Librarian of Stoa commands and functions.")
-    async def help(self, ctx, *input):
+    @bridge.bridge_command(name="help", help="Displays help about Librarian of Stoa commands and functions.")
+    @discord.option(
+        "command",
+        description="Name of command."
+    )
+    async def help(self, ctx, command = ""):
         """Shows all commands of the bot"""
 
         owner_name = "Jullan#5868"
@@ -27,7 +31,7 @@ class Help(commands.Cog):
         The bot is developed and maintained by {owner_name}, and is based on py-cord. If you have any suggestions you can always @ me on servers the bot is in.\nSource code can be found on [GitHub](https://github.com/Jullan-M/Librarian_of_Stoa).\nIf you're feeling generous you can donate to me on [PayPal](https://www.paypal.com/donate/?hosted_button_id=GE7JNW89XDQJN). Never necessary, but always appreciated.
         """
 
-        if not input:
+        if not command:
             # Starting to build embed
             emb = discord.Embed(title=title, color=discord.Color.blue(), description=description)
             
@@ -47,11 +51,11 @@ class Help(commands.Cog):
 
         # Block called when one command-name is given
         # trying to find matching cog and it's commands
-        elif len(input) == 1:
+        elif command:
             
             # Iterating trough cogs
-            if input[0] in self.cmds.keys():
-                cmd = self.cmds[input[0]]
+            if command in self.cmds.keys():
+                cmd = self.cmds[command]
                 title = f"`{self.prefix}{cmd.name} {' '.join('<' + a[0] + '>' for a in cmd.clean_params.items())}`"
                 description = f"{cmd.help}"
                 emb = discord.Embed(title=title, description=description, color=discord.Color.green())
@@ -59,15 +63,15 @@ class Help(commands.Cog):
                     aliases = "\nAliases: " + ', '.join(cmd.aliases)
                     emb.set_footer(text=aliases)
 
-            # If input not found
+            # If command not found
             # yes, for-loops have an else statement, it's called when no 'break' was issued
             else:
                 emb = discord.Embed(title="What's that?!",
-                                    description=f"I've never heard from a module called `{input[0]}` before.",
+                                    description=f"I've never heard from a module called `{command}` before.",
                                     color=discord.Color.orange())
 
         # Sending reply embed using our own function defined above
-        await ctx.send(embed=emb)
+        await ctx.respond(embed=emb)
 
 
 def setup(bot):

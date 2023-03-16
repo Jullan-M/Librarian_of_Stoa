@@ -195,7 +195,7 @@ def fetch_anger():
 
 if __name__ == "__main__":
     to_fetch = [
-        fetch_meditations, 
+        #fetch_meditations, # This wikisource primary text combines two chapter's into one paragraph.
         fetch_enchiridion, 
         fetch_letters,
         fetch_happylife, 

@@ -3,7 +3,7 @@ import discord
 import json
 import random
 import re
-from discord.ext import commands
+from discord.ext import bridge, commands
 from utilities import int2roman, split_within, uniform_random_choice_from_dict
 
 MAX_EMBED_LENGTH = 4096
@@ -48,7 +48,7 @@ class Librarian(commands.Cog, name='Librarian'):
             pg = i + 1
             em.set_footer(text=f"Page {pg} of {pages}")
 
-        message = await ctx.send(embed=embeds[0])
+        message = await ctx.respond(embed=embeds[0])
         
         await message.add_reaction("◀️")
         await message.add_reaction("▶️")
@@ -102,7 +102,7 @@ class Librarian(commands.Cog, name='Librarian'):
         # Check mark reacts make reactions go away (but one may still delete them!)
         messages = []
         for e in embeds:
-            messages.append(await ctx.send(embed=e)) 
+            messages.append(await ctx.respond(embed=e)) 
         last_message = messages[-1]
 
         await last_message.add_reaction("✅")
@@ -136,7 +136,7 @@ class Librarian(commands.Cog, name='Librarian'):
                 await last_message.clear_reactions()
                 break
 
-    @commands.command(name='meditations', help=f"[*The Meditations*](https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus) by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
+    @bridge.bridge_command(name='meditations', help=f"[*The Meditations*](https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus) by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
     async def meditations(self, ctx, bk_ch: str = ""):
         bk, cha = None, None
         try:
@@ -145,13 +145,13 @@ class Librarian(commands.Cog, name='Librarian'):
             else:
                 bk, cha = re.split("[:\.]", bk_ch, maxsplit=1)
         except ValueError:
-            return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `5:23` for Book 5, Chapter 23.")
+            return await ctx.respond(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `5:23` for Book 5, Chapter 23.")
             
         if not (bk in self.lib["meditations"]):
-            return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` of Meditations.")
+            return await ctx.respond(f"{ctx.author.mention}, there is no Book `{bk}` of Meditations.")
             
         if not (cha in self.lib["meditations"][bk]):
-            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of Meditations.")
+            return await ctx.respond(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of Meditations.")
         
         title = f"Meditations {bk}.{cha}"
         passage = self.lib["meditations"][bk][cha].rstrip()
@@ -174,12 +174,12 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='enchiridion', help="[*Enchiridion*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual) by Epictetus (Oldfather's translation). Example: .enchiridion 34")
+    @bridge.bridge_command(name='enchiridion', help="[*Enchiridion*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual) by Epictetus (Oldfather's translation). Example: .enchiridion 34")
     async def enchiridion(self, ctx, chapter: str = ""):
         if not chapter:
             chapter = str(random.randrange(1,54)) # Choose a random chapter of the 53 chapters
         elif not (chapter in self.lib["enchiridion"]):
-            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{chapter}` in The Enchiridion.")
+            return await ctx.respond(f"{ctx.author.mention}, there is no chapter `{chapter}` in The Enchiridion.")
         
         title = f"Enchiridion {chapter}"
         passage = self.lib["enchiridion"][chapter].rstrip()
@@ -202,7 +202,7 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='letters', aliases=["letter"], help="[*Moral letters to Lucilius*](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) by Seneca (Gummere's translation). Example: `.letters 99:3-6` gives §3-6 from Letter 99. `.letters 19 all` spews out all pages of letter 19 at once.")
+    @bridge.bridge_command(name='letters', aliases=["letter"], help="[*Moral letters to Lucilius*](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) by Seneca (Gummere's translation). Example: `.letters 99:3-6` gives §3-6 from Letter 99. `.letters 19 all` spews out all pages of letter 19 at once.")
     async def letters(self, ctx, bk_ch: str = "", post_all: str = ""):
         bk, cha = None, None
         if any([s in bk_ch for s in [":", "."]]):
@@ -215,7 +215,7 @@ class Librarian(commands.Cog, name='Librarian'):
         if not bk:
             bk = str(random.randrange(1,125)) # Choose a random letter of the 124 letters
         elif not (bk in self.lib["letters"]):
-            return await ctx.send(f"{ctx.author.mention}, there is no letter `{bk}` of the Moral letters.")
+            return await ctx.respond(f"{ctx.author.mention}, there is no letter `{bk}` of the Moral letters.")
         
         passage = None
         seneca = self.lib["media"]["seneca"]
@@ -223,11 +223,11 @@ class Librarian(commands.Cog, name='Librarian'):
             if "-" in cha:
                 cha1, cha2 = cha.split("-", maxsplit=1)
                 if not 0 < int(cha1) < int(cha2) or not (cha1 in self.lib["letters"][bk] and cha2 in self.lib["letters"][bk]):
-                    return await ctx.send(f"{ctx.author.mention}, `{cha1}-{cha2}` is not a valid range.")
+                    return await ctx.respond(f"{ctx.author.mention}, `{cha1}-{cha2}` is not a valid range.")
                 passage = " ".join([self.lib["letters"][bk][str(ch)] for ch in range(int(cha1), int(cha2) + 1)]).rstrip()
             else:
                 if not (int(cha) > 0 and cha in self.lib["letters"][bk]):
-                    return await ctx.send(f"{ctx.author.mention}, there is no paragraph `{cha}` in letter `{bk}` of the Moral letters.")
+                    return await ctx.respond(f"{ctx.author.mention}, there is no paragraph `{cha}` in letter `{bk}` of the Moral letters.")
                 passage = self.lib["letters"][bk][cha].rstrip()
         else:
             letter_passages = list(self.lib["letters"][bk].values())[1:]
@@ -260,12 +260,12 @@ class Librarian(commands.Cog, name='Librarian'):
         embeds = [embed]     
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='happylife', help="[*Of a Happy Life*](https://en.wikisource.org/wiki/Of_a_Happy_Life) by Seneca (Stewart's translation). Example: .happylife 12")
+    @bridge.bridge_command(name='happylife', help="[*Of a Happy Life*](https://en.wikisource.org/wiki/Of_a_Happy_Life) by Seneca (Stewart's translation). Example: .happylife 12")
     async def happylife(self, ctx, chapter: str = ""):
         if not chapter:
             chapter = str(random.randrange(1,29)) # Choose a random chapter of the 28 chapters
         elif not (chapter in self.lib["happylife"]):
-            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{chapter}` in `Of a Happy Life`.")
+            return await ctx.respond(f"{ctx.author.mention}, there is no chapter `{chapter}` in `Of a Happy Life`.")
         
         roman_num = int2roman(int(chapter))
         title = f"Of a Happy Life: Book {roman_num}"
@@ -285,13 +285,13 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='shortness', help="[*On the shortness of life*](https://en.wikisource.org/wiki/On_the_shortness_of_life) \
+    @bridge.bridge_command(name='shortness', help="[*On the shortness of life*](https://en.wikisource.org/wiki/On_the_shortness_of_life) \
         by Seneca (Basore's translation). Example: .shortness 13")
     async def shortness(self, ctx, chapter: str = ""):
         if not chapter:
             chapter = str(random.randrange(1,21)) # Choose a random chapter of the 21 chapters
         elif not (chapter in self.lib["shortness"]):
-            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{chapter}` in `On the shortness of life`.")
+            return await ctx.respond(f"{ctx.author.mention}, there is no chapter `{chapter}` in `On the shortness of life`.")
         
         roman_num = int2roman(int(chapter))
         title = f"On the shortness of life: Chapter {roman_num}"
@@ -311,7 +311,7 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @commands.command(name='discourses', help="[*The Discourses*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments) by Epictetus (Oldfather's translation). Example: .discourses 1:21")
+    @bridge.bridge_command(name='discourses', help="[*The Discourses*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments) by Epictetus (Oldfather's translation). Example: .discourses 1:21")
     async def discourses(self, ctx, bk_ch: str = ""):
         bk, cha = None, None
         try:
@@ -322,13 +322,13 @@ class Librarian(commands.Cog, name='Librarian'):
             else:
                 bk, cha = re.split("[:\.]", bk_ch, maxsplit=1)
         except ValueError:
-            return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
+            return await ctx.respond(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
             
         if not (bk in self.lib["discourses"]):
-            return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` in *The Discourses* (or it may have been lost to time 😢).")
+            return await ctx.respond(f"{ctx.author.mention}, there is no Book `{bk}` in *The Discourses* (or it may have been lost to time 😢).")
             
         if not (cha in self.lib["discourses"][bk]):
-            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of *The Discourses*.")
+            return await ctx.respond(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` of *The Discourses*.")
         
         title, passage = self.lib["discourses"][bk][cha].split("\n", maxsplit=1)
         title = f"The Discourses – Book {int2roman(int(bk))}, Chapter {cha}\n{title}"
@@ -347,7 +347,7 @@ class Librarian(commands.Cog, name='Librarian'):
         embed.set_thumbnail(url=epictetus["thumbnail"])        
         await self.deletables(ctx, [embed])
 
-    @commands.command(name='anger', aliases=["ofanger", "onanger"], help="[*Of Anger*](https://en.wikisource.org/wiki/Of_Anger) by Seneca (Stewart's translation). Example: .anger 2:10")
+    @bridge.bridge_command(name='anger', aliases=["ofanger", "onanger"], help="[*Of Anger*](https://en.wikisource.org/wiki/Of_Anger) by Seneca (Stewart's translation). Example: .anger 2:10")
     async def anger(self, ctx, bk_ch: str = ""):
         bk, cha = None, None
         try:
@@ -356,13 +356,13 @@ class Librarian(commands.Cog, name='Librarian'):
             else:
                 bk, cha = re.split("[:\.]", bk_ch, maxsplit=1)
         except ValueError:
-            return await ctx.send(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
+            return await ctx.respond(f"{ctx.author.mention}, invalid formatting. The correct syntax is `<BOOK>:<CHAPTER>`, e.g., `1:21` for Book 1, Chapter 21.")
             
         if not (bk in self.lib["discourses"]):
-            return await ctx.send(f"{ctx.author.mention}, there is no Book `{bk}` in *Of Anger*.")
+            return await ctx.respond(f"{ctx.author.mention}, there is no Book `{bk}` in *Of Anger*.")
             
         if not (cha in self.lib["discourses"][bk]):
-            return await ctx.send(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` in *Of Anger*.")
+            return await ctx.respond(f"{ctx.author.mention}, there is no chapter `{cha}` in Book `{bk}` in *Of Anger*.")
 
         roman_num = int2roman(int(bk))
         title = f"Of Anger: Book {roman_num} Chapter {cha}"
@@ -383,7 +383,7 @@ class Librarian(commands.Cog, name='Librarian'):
         await self.deletables(ctx, embeds)
         
 
-    @commands.command(name='random', help="Posts a random passage or chapter from any of the available books.")
+    @bridge.bridge_command(name='random', help="Posts a random passage or chapter from any of the available books.")
     async def random(self, ctx):
         # Put every function in the library in to a list
         functions = [self.enchiridion, self.discourses, self.meditations, self.shortness, self.happylife, self.letters, self.anger]
@@ -391,12 +391,12 @@ class Librarian(commands.Cog, name='Librarian'):
         print(f"Choosing a random chapter/passage from {func.name}")
         await func(ctx)
 
-    @commands.command(name='toc', aliases=["tableofcontents"], help="Shows table of contents (if any) of a given book. Example: .toc letters")
+    @bridge.bridge_command(name='toc', aliases=["tableofcontents"], help="Shows table of contents (if any) of a given book. Example: .toc letters")
     async def table_of_contents(self, ctx, title: str):
         try:
             book_data = self.lib["toc"][title]
         except KeyError:
-            await ctx.send(f"No table of contents was found for `{title}`")
+            await ctx.respond(f"No table of contents was found for `{title}`")
             return
         author = book_data["author"]
         author_media = self.lib["media"][author]
