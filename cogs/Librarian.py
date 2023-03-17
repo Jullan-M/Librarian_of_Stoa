@@ -50,6 +50,12 @@ class Librarian(commands.Cog, name='Librarian'):
 
         message = await ctx.respond(embed=embeds[0])
         
+        # TODO: Make buttons use API button system.
+        # Botched workaround to fetch the original message object
+        if isinstance(message, discord.Interaction):
+            message = await message.original_response()
+        
+        
         await message.add_reaction("◀️")
         await message.add_reaction("▶️")
 
@@ -102,7 +108,13 @@ class Librarian(commands.Cog, name='Librarian'):
         # Check mark reacts make reactions go away (but one may still delete them!)
         messages = []
         for e in embeds:
-            messages.append(await ctx.respond(embed=e)) 
+            messages.append(await ctx.respond(embed=e))
+        
+        # TODO: Make buttons use API button system.
+        # Botched workaround to fetch the original message object
+        if isinstance(messages[0], discord.Interaction):
+            messages[0] = await messages[0].original_response()
+        
         last_message = messages[-1]
 
         await last_message.add_reaction("✅")
