@@ -176,7 +176,7 @@ class Librarian(commands.Cog, name='Librarian'):
         color = 0xFF0000 # Red
 
         # Add link to comparison of translations
-        passage = passage + f"\n\n[Other translations](https://www.stoicsource.com/aurelius/meditations/{bk}.{int(cha):02d}/farquharson)"
+        passage = passage + f"\n\n[Other translations](https://www.stoicsource.com/aurelius/meditations/{bk}.{int(cha):02d}/haines)"
 
         to_send = split_within(passage, MAX_EMBED_LENGTH, ["\n", ". "], keep_delim=True)
         
@@ -222,7 +222,7 @@ class Librarian(commands.Cog, name='Librarian'):
     @bridge.bridge_command(name='letters', aliases=["letter"], help="[*Moral letters to Lucilius*](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) by Seneca (Gummere's translation). Example: `.letters 99:3-6` gives §3-6 from Letter 99. `.letters 19 all` spews out all pages of letter 19 at once.", description="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6")
     @discord.option(
         "bk_ch",
-        description="Book number and chapter number. E.g. 2.1"
+        description="Letter number and paragraph number. Also supports ranges of paragraphs, e.g., 2.1-3"
     )
     async def letters(self, ctx, bk_ch: str = "", post_all: str = ""):
         bk, cha = None, None
