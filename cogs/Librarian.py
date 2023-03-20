@@ -149,6 +149,10 @@ class Librarian(commands.Cog, name='Librarian'):
                 break
 
     @bridge.bridge_command(name='meditations', help=f"[*The Meditations*](https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus) by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
+    @discord.option(
+        "bk_ch",
+        description="Book number and chapter number. E.g. 2.1"
+    )
     async def meditations(self, ctx, bk_ch: str = ""):
         bk, cha = None, None
         try:
@@ -215,6 +219,10 @@ class Librarian(commands.Cog, name='Librarian'):
         await self.deletables(ctx, embeds)
 
     @bridge.bridge_command(name='letters', aliases=["letter"], help="[*Moral letters to Lucilius*](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) by Seneca (Gummere's translation). Example: `.letters 99:3-6` gives §3-6 from Letter 99. `.letters 19 all` spews out all pages of letter 19 at once.")
+    @discord.option(
+        "bk_ch",
+        description="Book number and chapter number. E.g. 2.1"
+    )
     async def letters(self, ctx, bk_ch: str = "", post_all: str = ""):
         bk, cha = None, None
         if any([s in bk_ch for s in [":", "."]]):
@@ -324,6 +332,10 @@ class Librarian(commands.Cog, name='Librarian'):
         await self.deletables(ctx, embeds)
 
     @bridge.bridge_command(name='discourses', help="[*The Discourses*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments) by Epictetus (Oldfather's translation). Example: .discourses 1:21")
+    @discord.option(
+        "bk_ch",
+        description="Book number and chapter number. E.g. 2.1"
+    )
     async def discourses(self, ctx, bk_ch: str = ""):
         bk, cha = None, None
         try:
@@ -360,6 +372,10 @@ class Librarian(commands.Cog, name='Librarian'):
         await self.deletables(ctx, [embed])
 
     @bridge.bridge_command(name='anger', aliases=["ofanger", "onanger"], help="[*Of Anger*](https://en.wikisource.org/wiki/Of_Anger) by Seneca (Stewart's translation). Example: .anger 2:10")
+    @discord.option(
+        "bk_ch",
+        description="Book number and chapter number. E.g. 2.1"
+    )
     async def anger(self, ctx, bk_ch: str = ""):
         bk, cha = None, None
         try:
@@ -404,6 +420,10 @@ class Librarian(commands.Cog, name='Librarian'):
         await func(ctx)
 
     @bridge.bridge_command(name='toc', aliases=["tableofcontents"], help="Shows table of contents (if any) of a given book. Example: .toc letters")
+    @discord.option(
+        "title",
+        description="Title of the book you want the table of contents for. Can be u"
+    )
     async def table_of_contents(self, ctx, title: str):
         try:
             book_data = self.lib["toc"][title]
