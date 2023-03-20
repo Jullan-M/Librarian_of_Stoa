@@ -7,12 +7,13 @@ class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.cmds = {}
+        self.prefix = self.bot.command_prefix
         for cmd in self.bot.walk_commands():
             self.cmds[cmd.name] = cmd
-        self.prefix = self.bot.command_prefix
         self.bot.remove_command('help')
 
-    @bridge.bridge_command(name="help", help="Displays help about Librarian of Stoa commands and functions.")
+    @bridge.bridge_command(name="help", description="Displays help about the commands and functions in Librarian of Stoa." \
+                           , help="Displays help about the commands and functions in Librarian of Stoa.")
     @discord.option(
         "command",
         description="Name of command."
@@ -39,7 +40,7 @@ class Help(commands.Cog):
             # List all unhidden commands
             for cmd_name, cmd in self.cmds.items():
                 if not cmd.hidden:
-                    value = f"{cmd.help}"
+                    value = cmd.help if cmd.help else cmd.description
                     # If command has aliases, add those in a new line
                     if cmd.aliases:
                         value = value + "\nAliases: " + ', '.join([f"`{a}`" for a in cmd.aliases])
@@ -57,11 +58,12 @@ class Help(commands.Cog):
             if command in self.cmds.keys():
                 cmd = self.cmds[command]
                 title = f"`{self.prefix}{cmd.name} {' '.join('<' + a[0] + '>' for a in cmd.clean_params.items())}`"
-                description = f"{cmd.help}"
+                description = cmd.help if cmd.help else cmd.description
                 emb = discord.Embed(title=title, description=description, color=discord.Color.green())
                 if cmd.aliases:
                     aliases = "\nAliases: " + ', '.join(cmd.aliases)
                     emb.set_footer(text=aliases)
+                print(f"'{cmd.description}' and '{cmd.help}'")
 
             # If command not found
             # yes, for-loops have an else statement, it's called when no 'break' was issued

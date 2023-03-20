@@ -148,7 +148,7 @@ class Librarian(commands.Cog, name='Librarian'):
                 await last_message.clear_reactions()
                 break
 
-    @bridge.bridge_command(name='meditations', help=f"[*The Meditations*](https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus) by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
+    @bridge.bridge_command(name='meditations', help=f"[*The Meditations*](https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus) by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23", description="The Meditations by Marcus Aurelius (Farquharson's translation). Example: .mediations 5:23")
     @discord.option(
         "bk_ch",
         description="Book number and chapter number. E.g. 2.1"
@@ -190,7 +190,8 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @bridge.bridge_command(name='enchiridion', help="[*Enchiridion*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual) by Epictetus (Oldfather's translation). Example: .enchiridion 34")
+    @bridge.bridge_command(name='enchiridion', help="[*Enchiridion*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual) by Epictetus (Oldfather's translation). Example: .enchiridion 34", description="Enchiridion by Epictetus (Oldfather's translation). Example: .enchiridion 34")
+    @discord.option("chapter", description="Chapter number. Range: 1 - 53")
     async def enchiridion(self, ctx, chapter: str = ""):
         if not chapter:
             chapter = str(random.randrange(1,54)) # Choose a random chapter of the 53 chapters
@@ -218,7 +219,7 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @bridge.bridge_command(name='letters', aliases=["letter"], help="[*Moral letters to Lucilius*](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) by Seneca (Gummere's translation). Example: `.letters 99:3-6` gives §3-6 from Letter 99. `.letters 19 all` spews out all pages of letter 19 at once.")
+    @bridge.bridge_command(name='letters', aliases=["letter"], help="[*Moral letters to Lucilius*](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) by Seneca (Gummere's translation). Example: `.letters 99:3-6` gives §3-6 from Letter 99. `.letters 19 all` spews out all pages of letter 19 at once.", description="Moral letters to Lucilius by Seneca (Gummere's translation). Example: .letters 99:3-6")
     @discord.option(
         "bk_ch",
         description="Book number and chapter number. E.g. 2.1"
@@ -280,7 +281,8 @@ class Librarian(commands.Cog, name='Librarian'):
         embeds = [embed]     
         await self.deletables(ctx, embeds)
 
-    @bridge.bridge_command(name='happylife', help="[*Of a Happy Life*](https://en.wikisource.org/wiki/Of_a_Happy_Life) by Seneca (Stewart's translation). Example: .happylife 12")
+    @bridge.bridge_command(name='happylife', help="[*Of a Happy Life*](https://en.wikisource.org/wiki/Of_a_Happy_Life) by Seneca (Stewart's translation). Example: .happylife 12", description="Of a Happy Life by Seneca (Stewart's translation). Example: .happylife 12")
+    @discord.option("chapter", description="Chapter number. Range: 1 - 28")
     async def happylife(self, ctx, chapter: str = ""):
         if not chapter:
             chapter = str(random.randrange(1,29)) # Choose a random chapter of the 28 chapters
@@ -305,11 +307,11 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @bridge.bridge_command(name='shortness', help="[*On the shortness of life*](https://en.wikisource.org/wiki/On_the_shortness_of_life) \
-        by Seneca (Basore's translation). Example: .shortness 13")
+    @bridge.bridge_command(name='shortness', help="[*On the shortness of life*](https://en.wikisource.org/wiki/On_the_shortness_of_life) by Seneca (Basore's translation). Example: .shortness 13", description="On the shortness of life by Seneca (Basore's translation). Example: .shortness 13")
+    @discord.option("chapter", description="Chapter number. Range: 1 - 20")
     async def shortness(self, ctx, chapter: str = ""):
         if not chapter:
-            chapter = str(random.randrange(1,21)) # Choose a random chapter of the 21 chapters
+            chapter = str(random.randrange(1,21)) # Choose a random chapter of the 20 chapters
         elif not (chapter in self.lib["shortness"]):
             return await ctx.respond(f"{ctx.author.mention}, there is no chapter `{chapter}` in `On the shortness of life`.")
         
@@ -331,7 +333,7 @@ class Librarian(commands.Cog, name='Librarian'):
             embeds.append(discord.Embed(description=to_send[1], color=color))
         await self.deletables(ctx, embeds)
 
-    @bridge.bridge_command(name='discourses', help="[*The Discourses*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments) by Epictetus (Oldfather's translation). Example: .discourses 1:21")
+    @bridge.bridge_command(name='discourses', help="[*The Discourses*](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments) by Epictetus (Oldfather's translation). Example: .discourses 1:21", description="The Discourses by Epictetus (Oldfather's translation). Example: .discourses 1:21")
     @discord.option(
         "bk_ch",
         description="Book number and chapter number. E.g. 2.1"
@@ -371,7 +373,7 @@ class Librarian(commands.Cog, name='Librarian'):
         embed.set_thumbnail(url=epictetus["thumbnail"])        
         await self.deletables(ctx, [embed])
 
-    @bridge.bridge_command(name='anger', aliases=["ofanger", "onanger"], help="[*Of Anger*](https://en.wikisource.org/wiki/Of_Anger) by Seneca (Stewart's translation). Example: .anger 2:10")
+    @bridge.bridge_command(name='anger', aliases=["ofanger", "onanger"], help="[*Of Anger*](https://en.wikisource.org/wiki/Of_Anger) by Seneca (Stewart's translation). Example: .anger 2:10", description="Of Anger* by Seneca (Stewart's translation). Example: .anger 2:10")
     @discord.option(
         "bk_ch",
         description="Book number and chapter number. E.g. 2.1"
@@ -411,15 +413,17 @@ class Librarian(commands.Cog, name='Librarian'):
         await self.deletables(ctx, embeds)
         
 
-    @bridge.bridge_command(name='random', help="Posts a random passage or chapter from any of the available books.")
+    @bridge.bridge_command(name='random', description="Posts a random passage or chapter from any of the available books.", \
+                           help="Posts a random passage or chapter from any of the available books.")
     async def random(self, ctx):
         # Put every function in the library in to a list
         functions = [self.enchiridion, self.discourses, self.meditations, self.shortness, self.happylife, self.letters, self.anger]
         func = random.choice(functions)
-        print(f"Choosing a random chapter/passage from {func.name}")
-        await func(ctx)
+        print(f"Choosing a random chapter/passage from {func.slash_variant.name}")
+        await func.slash_variant(ctx)
 
-    @bridge.bridge_command(name='toc', aliases=["tableofcontents"], help="Shows table of contents (if any) of a given book. Example: .toc letters")
+    @bridge.bridge_command(name='toc', aliases=["tableofcontents"], description="Shows table of contents (if any) of a given book. Example: .toc letters", \
+                           help="Posts a random passage or chapter from any of the available books.")
     @discord.option(
         "title",
         description="Title of the book you want the table of contents for. Can be u"
