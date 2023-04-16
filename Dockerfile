@@ -1,5 +1,5 @@
 FROM python:3.8
-COPY main.py utilities.py .env ./
+COPY main.py utilities.py ./
 COPY cogs/*.py cogs/
 COPY books/*.json books/
 COPY requirements.txt ./
