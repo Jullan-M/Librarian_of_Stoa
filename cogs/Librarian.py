@@ -32,6 +32,7 @@ class Librarian(commands.Cog, name="Librarian"):
             "shortness",  # Shortness of life
             "discourses",  # The Discourses
             "anger",  # Of Anger
+            "musonius",  # Lectures, Fragments by Musonius Rufus
             "media",  # Author information and wikisource links
             "toc",  # Table of Contents for some books
         ]
@@ -526,6 +527,101 @@ class Librarian(commands.Cog, name="Librarian"):
         await self.deletables(ctx, embeds)
 
     @bridge.bridge_command(
+        name="musonius",
+        aliases=["lectures", "lecture", "fragment"],
+        help="[*Lectures and Fragments*](https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus?authuser=0) by Musonius Rufus (Cora E. Lutz's translation). Example: `.musonius 4:3-6` gives §3-6 from Lecture 4. `.musonius 19 all` spews out all pages of Lecture 19 at once.",
+        description="Lectures and Fragments by Musonius Rufus (Cora E. Lutz's translation). Example: .musonius 4:3-6",
+    )
+    @discord.option(
+        "lec_para",
+        description="Chapter number and paragraph number. Also supports ranges of paragraphs, e.g., 2.1-3",
+    )
+    async def musonius(self, ctx, lec_para: str = "", post_all: str = ""):
+        lec, para = None, None
+        if any([s in lec_para for s in [":", "."]]):
+            lec, para = re.split("[:\.]", lec_para, maxsplit=1)
+        else:
+            lec = lec_para
+
+        if not lec_para:
+            lec = str(
+                random.randrange(1, 54)
+            )  # Choose a random text of the 53 lectures  / fragments
+        elif not (lec in self.lib["musonius"]):
+            return await ctx.respond(
+                f"{ctx.author.mention}, there is no Lecture no. `{lec}` in Musonius' lectures / fragments."
+            )
+
+        passage = None
+        musonius = self.lib["media"]["musonius"]
+        if para:
+            if "-" in para:
+                para1, para2 = para.split("-", maxsplit=1)
+                if not 0 < int(para1) < int(para2) or not (
+                    para1 in self.lib["musonius"][lec]
+                    and para2 in self.lib["musonius"][lec]
+                ):
+                    return await ctx.respond(
+                        f"{ctx.author.mention}, `{para1}-{para2}` is not a valid range."
+                    )
+                passage = " ".join(
+                    [
+                        self.lib["musonius"][lec][str(ch)]
+                        for ch in range(int(para1), int(para2) + 1)
+                    ]
+                ).rstrip()
+            else:
+                if not (int(para) > 0 and para in self.lib["musonius"][lec]):
+                    return await ctx.respond(
+                        f"{ctx.author.mention}, there is no paragraph `{para}` in lecture `{lec}` of Musonius' Lectures."
+                    )
+                passage = self.lib["musonius"][lec][para].rstrip()
+        else:
+            lecture_passages = list(self.lib["musonius"][lec].values())[1:]
+            passage = "".join(lecture_passages)
+        title = f"{self.lib['musonius'][lec]['0']}"
+
+        if para:
+            title += f"\n§{para}"
+
+        # Handle links
+        passage_url = (
+            f"{musonius['url']}/lectures/{int(lec):02}"
+            if int(lec) <= 21
+            else f"{musonius['url']}/fragments/{int(lec):02}"
+        )
+
+        # Add additional string for fragmented texts
+        if lec in ["13", "18"]:
+            passage_url = passage_url + "-0"
+
+        color = 0xFFEEFF  # white (?)
+        if len(passage) > MAX_EMBED_LENGTH and not para:
+            to_send = split_within(
+                passage, MAX_EMBED_LENGTH, ["\n", ". "], keep_delim=True
+            )
+
+            # Post every embed if "all" parameter is passed, else do flippable embed pages
+            if post_all == "all":
+                embeds = [
+                    self.generate_embed(title, to_send[0], musonius, passage_url, color)
+                ]
+                for t in to_send[1:]:
+                    embeds.append(discord.Embed(description=t, color=color))
+                await self.deletables(ctx, embeds)
+            else:
+                embeds = [
+                    self.generate_embed(title, t, musonius, passage_url, color)
+                    for t in to_send
+                ]
+                await self.multi_page(ctx, embeds)
+            return
+
+        embed = self.generate_embed(title, passage, musonius, passage_url, color)
+        embeds = [embed]
+        await self.deletables(ctx, embeds)
+
+    @bridge.bridge_command(
         name="random",
         description="Posts a random passage or chapter from any of the available books.",
         help="Posts a random passage or chapter from any of the available books.",
@@ -540,6 +636,7 @@ class Librarian(commands.Cog, name="Librarian"):
             self.happylife,
             self.letters,
             self.anger,
+            self.musonius,
         ]
         func = random.choice(functions)
         print(f"Choosing a random chapter/passage from {func.slash_variant.name}")
@@ -549,7 +646,7 @@ class Librarian(commands.Cog, name="Librarian"):
         name="toc",
         aliases=["tableofcontents"],
         description="Shows table of contents (if any) of a given book. Example: .toc letters",
-        help="Posts a random passage or chapter from any of the available books.",
+        help="Shows table of contents (if any) of a given book. Example: .toc letters",
     )
     @discord.option(
         "title",

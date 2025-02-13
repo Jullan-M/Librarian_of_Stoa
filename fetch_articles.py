@@ -225,15 +225,190 @@ def fetch_anger():
         f.write(json.dumps(books, indent="\t", ensure_ascii=False))
 
 
+def fetch_musonius():
+    # Musonius Rufus' discourses
+
+    def scrape_page(url: str):
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, "html.parser")
+        return soup.find_all("div", class_="tyJCtd mGzaTb Depvyb baZpAe")[0].find_all(
+            "p"
+        )
+
+    book = {}
+    for i in range(1, 10):
+        print(f"Fetching Musonius Rufus' - Lectures {i} of 21")
+        # Lecture i in book
+        book[f"{i}"] = {}
+        url = f"https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus/lectures/{i:02}"
+
+        # Scrape the page
+        results = scrape_page(url)
+
+        title = f"Lecture {int2roman(i)} - {results[1].find("em").text}"
+        book[f"{i}"]["0"] = title
+
+        last_index = "1"
+        for j in range(2, len(results)):
+            if any(char in results[j].text for char in ["◄", "►"]):
+                book[f"{i}"][f"{last_index}"] = book[f"{i}"][f"{last_index}"].rstrip()
+                break
+
+            text = re.sub("\[\d+\]", "", results[j].text)
+
+            # Special case handling for lecture 7, 3rd paragraph
+            m = (
+                re.fullmatch(r"(\d+) (.+)", text)
+                if not (i == 7 and j - 1 == 3)
+                else re.fullmatch(r"(\d+)(.+)", text)
+            )
+            if m:
+                if int(m[1]) > int(last_index):
+                    book[f"{i}"][f"{last_index}"] = book[f"{i}"][f"{last_index}"] + "\n"
+
+                last_index = m[1]
+
+                book[f"{i}"][m[1]] = m[2] + "\n"
+            else:
+                book[f"{i}"][f"{last_index}"] = (
+                    book[f"{i}"][f"{last_index}"].lstrip() + text + "\n"
+                )
+
+    for i in ["10", "11", "12", "13-0", "13-1", "14"]:
+        print(f"Fetching Musonius Rufus' - Lectures {i} of 21")
+        # Lecture i in book
+        book[i] = {}
+        url = f"https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus/lectures/{i}"
+
+        # Scrape the page
+        results = scrape_page(url)
+
+        title = f"Lecture {int2roman(int(i[:2]))} - {results[1].find("em").text}"
+        book[f"{i}"]["0"] = title
+
+        last_index = "1"
+        for j in range(2, len(results)):
+            if any(char in results[j].text for char in ["◄", "►"]) or (
+                i == "11" and j >= 8
+            ):
+                book[i][f"{last_index}"] = book[i][f"{last_index}"].rstrip()
+                break
+
+            text = re.sub("\[\d+\]", "", results[j].text)
+            matches = re.findall(r"(\d+)(\D+)", text)
+            if matches:
+                if int(matches[0][0]) > int(last_index):
+                    book[f"{i}"][f"{last_index}"] = book[f"{i}"][f"{last_index}"] + "\n"
+                for m in matches:
+                    # Exception for lecture 11, paragragh 2, sentence 22
+                    if i == "11" and j == 3 and m[0] == "2":
+                        last_index = "23"
+                        book[i]["23"] = m[1]
+                        continue
+                    last_index = m[0]
+                    book[i][m[0]] = m[1]
+
+            else:
+                book[i][f"{last_index}"] = book[i][f"{last_index}"] + text
+            # Add lineshift
+            book[i][last_index] = book[i][last_index].rstrip() + "\n"
+
+    # Merge entry 13-0 and 13-1 into one entry, remove their individual entries
+    print("Merging 13-0 and 13-1")
+    book["13"] = book["13-0"].copy()
+    max_key = list(book["13"].keys())[-1]
+    book["13"][f"{max_key}"] = (
+        book["13"][f"{max_key}"]
+        + "\n\n[... TIME DEVOURS ALL—THE WRITER, THE READER, THE PAGES. BUT FOR NOW, THE FOLLOWING SURVIVES. FOR NOW, SO DO YOU ...]\n\n"
+    )
+
+    for key, value in book["13-1"].items():
+        if key == "0":
+            continue
+        book["13"][f"{int(max_key) + int(key)}"] = value
+    del book["13-0"]
+    del book["13-1"]
+
+    for i in ["15", "16", "17", "18-0", "18-1", "19", "20", "21"]:
+        print(f"Fetching Musonius Rufus' - Lectures {i} of 21")
+        # Lecture i in book
+        book[f"{i}"] = {}
+        url = f"https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus/lectures/{i}"
+
+        # Scrape the page
+        results = scrape_page(url)
+
+        title = f"Lecture {int2roman(int(i[:2]))} - {results[1].find("em").text}"
+        book[f"{i}"]["0"] = title
+        book[f"{i}"]["1"] = ""
+        last_index = 1
+        for j in range(2, len(results)):
+            index = j - 1
+            if any(char in results[j].text for char in ["◄", "►"]):
+                break
+            text = re.sub("\[\d+\]", "", results[j].text)
+            book[f"{i}"][f"{index}"] = text.rstrip() + "\n\n"
+            last_index = index
+        book[f"{i}"][f"{last_index}"] = book[f"{i}"][f"{last_index}"].rstrip()
+
+    # Merge entry 18-0 and 18-1 into one entry, remove their individual entries
+    print("Merging 18-0 and 18-1")
+    book["18"] = book["18-0"].copy()
+    max_key = list(book["18"].keys())[-1]
+    book["18"][f"{max_key}"] = (
+        book["18"][f"{max_key}"]
+        + "\n\n[... LIKE THE WORDS OF WISDOM ONCE WRITTEN HERE, YOU TOO WILL ONE DAY BE FRAGMENTED—MAKE GOOD USE OF WHAT REMAINS ...]\n\n"
+    )
+
+    for key, value in book["18-1"].items():
+        if key == "0":
+            continue
+        book["18"][f"{int(max_key) + int(key)}"] = value
+    del book["18-0"]
+    del book["18-1"]
+
+    for i in range(22, 54):
+        print(f"Fetching Musonius Rufus' - Fragments {i} of 53")
+        # Lecture i in book
+        book[f"{i}"] = {}
+        url = f"https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus/fragments/{i}"
+
+        # Scrape the page
+        results = scrape_page(url)
+
+        title = (
+            f"Fragment {int2roman(i)} - {results[1].find("em").text}"
+            if results[1].find("em")
+            else f"Fragment {int2roman(i)}"
+        )
+        book[f"{i}"]["0"] = title
+        book[f"{i}"]["1"] = ""
+        last_index = 1
+        start_index = 1 if i in [36, 37, 43, 44, 45, 46, 47, 48, 50, 52, 53] else 2
+        for j in range(start_index, len(results)):
+            index = j if i in [36, 37, 43, 44, 45, 46, 47, 48, 50, 52, 53] else j - 1
+            if any(char in results[j].text for char in ["◄", "►"]):
+                break
+
+            text = re.sub("\[\d+\]", "", results[j].text)
+            book[f"{i}"][f"{index}"] = text.rstrip() + "\n"
+            last_index = index
+        book[f"{i}"][f"{last_index}"] = book[f"{i}"][f"{last_index}"].rstrip()
+
+    with open("books/musonius.json", "w", encoding="utf-8") as f:
+        json.dump(book, f, indent="\t", ensure_ascii=False)
+
+
 if __name__ == "__main__":
     to_fetch = [
         # fetch_meditations, # This wikisource primary text combines two chapter's into one paragraph.
-        fetch_enchiridion,
-        fetch_letters,
-        fetch_happylife,
-        fetch_shortness,
-        fetch_discourses,
-        fetch_anger,
+        # fetch_enchiridion,
+        # fetch_letters,
+        # fetch_happylife,
+        # fetch_shortness,
+        # fetch_discourses,
+        # fetch_anger,
+        fetch_musonius,
     ]
 
     for f in to_fetch:

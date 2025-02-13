@@ -23,5 +23,10 @@
     "happylife": "https://en.wikisource.org/wiki/Of_a_Happy_Life",
     "shortness": "https://en.wikisource.org/wiki/On_the_shortness_of_life",
     "anger": "https://en.wikisource.org/wiki/Of_Anger"
+  },
+  "musonius": {
+    "name": "Musonius Rufus",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Head_of_a_philosopher_-_Archaeological_Museum_of_Delphi.jpg/450px-Head_of_a_philosopher_-_Archaeological_Museum_of_Delphi.jpg",
+    "url": "https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus"
   }
 }
