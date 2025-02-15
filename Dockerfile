@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.12.3
 COPY main.py utilities.py ./
 COPY cogs/*.py cogs/
 COPY books/*.json books/

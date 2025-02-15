@@ -47,7 +47,7 @@ def fetch_enchiridion():
 
     txt_split = re.split("\n\d+\.", text)[1:]
     for ps, t in enumerate(txt_split):
-        book[ps + 1] = t.strip()
+        book[ps + 1] = re.sub("(?<!\n)\n(?!\n)", "\n\n", t).strip()
 
     with open("books/enchiridion.json", "w", encoding="utf-8") as f:
         f.write(json.dumps(book, indent="\t", ensure_ascii=False))
@@ -57,26 +57,46 @@ def fetch_letters():
     book = {}
 
     for i in range(1, 125):
-        print(f"Fetching Letter {i} of 124", end="\r")
+        print(f"Fetching Letter {i} of 124", end="\n")
         url = f"https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_{i}"
         results = scrape_by_class(url, "mw-parser-output")
-        text = results[-1].text
-        title, text = text.split("[edit]", maxsplit=1)
-        title = title.rsplit("\n", maxsplit=1)[-1]
-        text = text.split("Footnotes", maxsplit=1)[0]
+
+        # Remove superfluous stuff
+        headerContainer = results[0].find_all(
+            "div",
+            class_="ws-header wst-header-structure wst-unknown wst-header ws-header ws-noexport noprint dynlayout-exempt",
+        )
+
+        headerContainer[0].extract()
+
+        titleContainer = results[0].find_all(
+            "div",
+            class_="wst-center tiInherit wst-center-nomargin",
+        )
+
+        title = titleContainer[1].text if i == 1 else titleContainer[0].text
+
+        title = title.split(". ", maxsplit=1)[-1].replace("[1]", "").strip()
+        for t in titleContainer:
+            t.extract()
+
+        references = results[0].find_all("div", class_="reflist")
+        if references:
+            references[0].extract()
+
+        text = results[0].text.strip()
 
         chapter = {}
         # Chapter 0 is the title of the letter
-        chapter[0] = title.split(". ", maxsplit=1)[-1].replace("[1]", "")
+        chapter[0] = title
 
         txt_split = re.split("\d+\.\s", text)
         for ps, t in enumerate(txt_split):
             passage = re.sub("\[\d+\]", "", t.lstrip())
             # Replace single linebreaks with double using regex negative lookbehind and lookahead
             passage = re.sub("(?<!\n)\n(?!\n)", "\n\n", passage)
-            if passage:
+            if passage and ps > 0:
                 chapter[ps] = passage
-
         book[i] = chapter
 
     with open("books/letters.json", "w", encoding="utf-8") as f:
@@ -93,7 +113,8 @@ def fetch_happylife():
 
         # Remove superfluous stuff
         headerContainer = results[0].find_all(
-            "div", class_="ws-noexport noprint dynlayout-exempt"
+            "div",
+            class_="ws-header wst-header-structure wst-unknown wst-header ws-header ws-noexport noprint dynlayout-exempt",
         )
         headerContainer[0].extract()
         licenseContainer = results[0].find_all(
@@ -107,7 +128,8 @@ def fetch_happylife():
         text = results[-1].text
         text = text.split("Footnotes", maxsplit=1)[0]
         text = text.split(f"{int2roman(i)}.", maxsplit=1)[-1]
-        book[i] = text.strip()
+        # Replace single lineshifts with double (only if there is single lineshift).
+        book[i] = re.sub("\n\n\n", "\n\n", text).strip()
 
     with open("books/happylife.json", "w", encoding="utf-8") as f:
         f.write(json.dumps(book, indent="\t", ensure_ascii=False))
@@ -123,17 +145,21 @@ def fetch_shortness():
 
         # Remove superfluous stuff
         headerContainer = results[0].find_all(
-            "div", class_="ws-noexport noprint dynlayout-exempt"
+            "div",
+            class_="ws-header wst-header-structure wst-unknown wst-header ws-header ws-noexport noprint dynlayout-exempt",
         )
+
         headerContainer[0].extract()
         references = results[0].find_all("sup", class_="reference")
+
         for r in references:
             r.extract()
 
         text = results[-1].text
         text = text.split("Footnotes", maxsplit=1)[0]
         text = text.split(f"{i}.", maxsplit=1)[-1]
-        book[i] = text.strip()
+        # Replace single lineshifts with double (only if there is single lineshift).
+        book[i] = re.sub("(?<!\n)\n(?!\n)", "\n\n", text).strip()
 
     with open("books/shortness.json", "w", encoding="utf-8") as f:
         f.write(json.dumps(book, indent="\t", ensure_ascii=False))
@@ -179,12 +205,17 @@ def fetch_anger():
     for i, chaps in enumerate(chapters):
         print(f'Fetching "On Anger" Book {i+1}', end="\r")
         url = f"https://en.wikisource.org/wiki/Of_Anger/Book_{int2roman(i+1)}"
-        results = scrape_by_class(url, "mw-parser-output")[-1]
+        results = scrape_by_class(url, "mw-content-ltr mw-parser-output")[0]
+
         # Remove superfluous stuff
         results.find(
-            "div", class_="ws-noexport noprint dynlayout-exempt"
+            "div",
+            class_="ws-header wst-header-structure wst-unknown wst-header ws-header ws-noexport noprint dynlayout-exempt",
         ).extract()  # Shave off book info
-        front = results.find_all("div", class_="wst-center")
+
+        front = results.find_all(
+            "div", class_="wst-center tiInherit wst-center-nomargin"
+        )
         edits = results.find_all("span", class_="mw-editsection")
         references = results.find_all("sup", class_="reference")
         for f in front:
@@ -193,32 +224,38 @@ def fetch_anger():
             e.extract()  # Shave off "edit" prompts
         for r in references:
             r.extract()  # Shave off reference numbering
-        results.find("table", class_="__smalltoc").extract()  # Shave off small toc
+        results.find(
+            "table", class_="wst-small-toc wst-small-toc-center"
+        ).extract()  # Shave off small toc
+        results.find("div", class_="reflist").extract()  # Shave off Footnotes
+        results.find(
+            "div", class_="licenseContainer licenseBanner dynlayout-exempt"
+        ).extract()
         results = results.find_all(
             ["h2", "p", "dd"]
         )  # Headers, paragraphs and centered quotes
-        results = results[:-2]  # Shave off footnotes
+
+        # Shave off some extra fluff (including footnotes headers)
+        results = results[:-1] if i + 1 != 2 else results[:-2]
 
         # Fill book
         book = {}
-        headindex = 1
+        headindex = 0
         text = ""
-        for soup in results[1:]:
-            if soup.find("span", class_="mw-headline"):
-                # Replace single linebreaks with double using regex negative lookbehind and lookahead
-                text = re.sub("(?<!\n)\n(?!\n)", "\n\n", text)
-                book[headindex] = text.strip()
+        for soup in results:
+            if soup.name == "h2":
+                if headindex > 0:
+                    book[headindex] = re.sub("(?<!\n)\n(?!\n)", "\n\n", text.strip())
                 text = ""
                 headindex += 1
-                continue
-
-            if not (soup.text in text):
-                if soup.find("dd") or soup.find("dl"):
+            elif soup.name == "p":
+                # Replace single linebreaks with double using regex negative lookbehind and lookahead
+                text += soup.text
+            elif soup.name == "dd" and soup.find_parent("dd"):
+                # We have to do this otherwise it duplicates. the dd-dl tree coming from the findall above is nested
+                if not soup.text in text:
                     text += soup.text + "\n"
-                else:
-                    text += soup.text
-
-        book[headindex] = text.lstrip()  # Last page
+        book[headindex] = text.strip()  # Last page
         books[i + 1] = book
 
     with open("books/anger.json", "w", encoding="utf-8") as f:
@@ -237,7 +274,7 @@ def fetch_musonius():
 
     book = {}
     for i in range(1, 10):
-        print(f"Fetching Musonius Rufus' - Lectures {i} of 21")
+        print(f"Fetching Musonius Rufus' - Lectures {i} of 21", end="\r")
         # Lecture i in book
         book[f"{i}"] = {}
         url = f"https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus/lectures/{i:02}"
@@ -275,7 +312,7 @@ def fetch_musonius():
                 )
 
     for i in ["10", "11", "12", "13-0", "13-1", "14"]:
-        print(f"Fetching Musonius Rufus' - Lectures {i} of 21")
+        print(f"Fetching Musonius Rufus' - Lectures {i} of 21", end="\r")
         # Lecture i in book
         book[i] = {}
         url = f"https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus/lectures/{i}"
@@ -330,7 +367,7 @@ def fetch_musonius():
     del book["13-1"]
 
     for i in ["15", "16", "17", "18-0", "18-1", "19", "20", "21"]:
-        print(f"Fetching Musonius Rufus' - Lectures {i} of 21")
+        print(f"Fetching Musonius Rufus' - Lectures {i} of 21", end="\r")
         # Lecture i in book
         book[f"{i}"] = {}
         url = f"https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus/lectures/{i}"
@@ -368,7 +405,7 @@ def fetch_musonius():
     del book["18-1"]
 
     for i in range(22, 54):
-        print(f"Fetching Musonius Rufus' - Fragments {i} of 53")
+        print(f"Fetching Musonius Rufus' - Fragments {i} of 53", end="\r")
         # Lecture i in book
         book[f"{i}"] = {}
         url = f"https://sites.google.com/site/thestoiclife/the_teachers/musonius-rufus/fragments/{i}"
@@ -402,12 +439,12 @@ def fetch_musonius():
 if __name__ == "__main__":
     to_fetch = [
         # fetch_meditations, # This wikisource primary text combines two chapter's into one paragraph.
-        # fetch_enchiridion,
-        # fetch_letters,
-        # fetch_happylife,
-        # fetch_shortness,
-        # fetch_discourses,
-        # fetch_anger,
+        fetch_enchiridion,
+        fetch_letters,
+        fetch_happylife,
+        fetch_shortness,
+        fetch_discourses,
+        fetch_anger,
         fetch_musonius,
     ]
 
